@@ -1,0 +1,83 @@
+export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
+
+export interface Database {
+  public: {
+    Tables: {
+      locations: {
+        Row: {
+          id: string;
+          name: string;
+          country: string;
+          tags: string[];
+          description: string;
+        };
+        Insert: {
+          id?: string;
+          name: string;
+          country: string;
+          tags?: string[];
+          description: string;
+        };
+        Update: {
+          id?: string;
+          name?: string;
+          country?: string;
+          tags?: string[];
+          description?: string;
+        };
+      };
+      user_interests: {
+        Row: {
+          id: string;
+          user_id: string;
+          location_id: string;
+          budget: number;
+          priority_level: number;
+          activities: string;
+          notes: string | null;
+        };
+        Insert: {
+          id?: string;
+          user_id: string;
+          location_id: string;
+          budget: number;
+          priority_level: number;
+          activities: string;
+          notes?: string | null;
+        };
+        Update: {
+          id?: string;
+          user_id?: string;
+          location_id?: string;
+          budget?: number;
+          priority_level?: number;
+          activities?: string;
+          notes?: string | null;
+        };
+      };
+    };
+    Views: {
+      [_ in never]: never;
+    };
+    Functions: {
+      [_ in never]: never;
+    };
+    Enums: {
+      [_ in never]: never;
+    };
+  };
+  auth: {
+    Tables: {
+      users: {
+        Row: {
+          id: string;
+          email: string;
+        };
+      };
+    };
+  };
+}
+
+export type Location = Database["public"]["Tables"]["locations"]["Row"];
+export type UserInterest = Database["public"]["Tables"]["user_interests"]["Row"];
+export type UserInterestInsert = Database["public"]["Tables"]["user_interests"]["Insert"];
