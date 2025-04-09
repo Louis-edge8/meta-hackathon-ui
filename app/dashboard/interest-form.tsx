@@ -1,69 +1,80 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { useRouter } from "next/navigation"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Textarea } from "@/components/ui/textarea"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { useToast } from "@/components/ui/use-toast"
-import type { Location, UserInterestInsert } from "@/lib/database.types"
+import { useState } from "react";
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs";
+import { useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { useToast } from "@/components/ui/use-toast";
+import type { Location, UserInterestInsert } from "@/lib/database.types";
 
 interface InterestFormProps {
-  locations: Location[]
-  userId: string
+  locations: Location[];
+  userId: string;
 }
 
 export function InterestForm({ locations, userId }: InterestFormProps) {
-  const router = useRouter()
-  const { toast } = useToast()
-  const supabase = createClientComponentClient()
-  const [isLoading, setIsLoading] = useState(false)
+  const router = useRouter();
+  const { toast } = useToast();
+  const supabase = createClientComponentClient();
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [formData, setFormData] = useState<Omit<UserInterestInsert, "user_id">>({
-    location_id: "",
-    budget: 0,
-    priority_level: 1,
-    activities: "",
-    notes: "",
-  })
+  const [formData, setFormData] = useState<Omit<UserInterestInsert, "user_id">>(
+    {
+      location_id: "",
+      budget: 0,
+      priority_level: 1,
+      activities: "",
+      notes: "",
+    }
+  );
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { name, value } = e.target;
     setFormData((prev) => ({
       ...prev,
       [name]: name === "budget" ? Number.parseInt(value) || 0 : value,
-    }))
-  }
+    }));
+  };
 
   const handleSelectChange = (name: string, value: string) => {
     setFormData((prev) => ({
       ...prev,
       [name]: name === "priority_level" ? Number.parseInt(value) : value,
-    }))
-  }
+    }));
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setIsLoading(true)
+    e.preventDefault();
+    setIsLoading(true);
 
     try {
       // First, check if the user exists in the auth.users table
-      const { data: userData, error: userError } = await supabase.auth.getUser()
+      const { data: userData, error: userError } =
+        await supabase.auth.getUser();
 
-      if (userError) throw userError
+      if (userError) throw userError;
 
       if (!userData || !userData.user) {
-        throw new Error("User not authenticated properly")
+        throw new Error("User not authenticated properly");
       }
 
       // Log the user ID for debugging
-      console.log("User ID from auth:", userData.user.id)
-      console.log("User ID from props:", userId)
+      console.log("User ID from auth:", userData.user.id);
+      console.log("User ID from props:", userId);
 
       // Use the server API route to handle the insert with admin privileges
       const response = await fetch("/api/interests", {
@@ -73,21 +84,21 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
         },
         body: JSON.stringify({
           ...formData,
-          user_id: 'be5e6527-e048-42e6-856c-93aaf1695311',
+          user_id: userId, // Use the userId prop passed to the component
         }),
-      })
+      });
 
-      const result = await response.json()
-      console.log("Success")
+      const result = await response.json();
+      console.log("Success");
 
       if (!response.ok) {
-        throw new Error(result.error || "Failed to save interest")
+        throw new Error(result.error || "Failed to save interest");
       }
 
       toast({
         title: "Success!",
         description: "Your travel interest has been saved.",
-      })
+      });
 
       // Reset form
       setFormData({
@@ -96,21 +107,22 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
         priority_level: 1,
         activities: "",
         notes: "",
-      })
+      });
 
       // Refresh the page to show the new interest
-      router.refresh()
+      router.refresh();
     } catch (error: any) {
-      console.error("Error saving interest:", error)
+      console.error("Error saving interest:", error);
       toast({
         title: "Error saving interest",
-        description: error.message || "An error occurred while saving your interest",
+        description:
+          error.message || "An error occurred while saving your interest",
         variant: "destructive",
-      })
+      });
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-4">
@@ -195,5 +207,5 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
         {isLoading ? "Saving..." : "Save Interest"}
       </Button>
     </form>
-  )
+  );
 }

@@ -1,11 +1,5 @@
 "use client"
 
-import { useEffect, useState } from "react"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { useRouter } from "next/navigation"
-import { Trash2, Loader2 } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { useToast } from "@/components/ui/use-toast"
 import {
   AlertDialog,
   AlertDialogAction,
@@ -16,7 +10,13 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
+import { Button } from "@/components/ui/button"
+import { useToast } from "@/components/ui/use-toast"
 import type { Location, UserInterest } from "@/lib/database.types"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { Loader2, Trash2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 
 interface InterestWithLocation extends UserInterest {
   locations: Location
@@ -24,14 +24,15 @@ interface InterestWithLocation extends UserInterest {
 
 interface InterestsListProps {
   userId: string
+  initialInterests: InterestWithLocation[]
 }
 
-export function InterestsList({ userId }: InterestsListProps) {
+export function InterestsList({ userId, initialInterests }: InterestsListProps) {
   const router = useRouter()
   const { toast } = useToast()
   const supabase = createClientComponentClient()
-  const [interests, setInterests] = useState<InterestWithLocation[]>([])
-  const [isLoading, setIsLoading] = useState(true)
+  const [interests, setInterests] = useState<InterestWithLocation[]>(initialInterests)
+  const [isLoading, setIsLoading] = useState(false)
   const [deleteId, setDeleteId] = useState<string | null>(null)
   const [isDeleting, setIsDeleting] = useState(false)
 
@@ -39,17 +40,8 @@ export function InterestsList({ userId }: InterestsListProps) {
     const fetchInterests = async () => {
       setIsLoading(true)
       try {
-        // First, verify the user is authenticated
-        const { data: userData, error: userError } = await supabase.auth.getUser()
-
-        if (userError) throw userError
-
-        if (!userData || !userData.user) {
-          throw new Error("User not authenticated properly")
-        }
-
         // Use the API route to fetch interests
-        const response = await fetch(`/api/interests?userId=${userData.user.id}`)
+        const response = await fetch(`/api/interests?userId=${userId}`)
 
         if (!response.ok) {
           const errorData = await response.json()
@@ -71,7 +63,7 @@ export function InterestsList({ userId }: InterestsListProps) {
     }
 
     fetchInterests()
-  }, [supabase, userId, toast])
+  }, [userId, toast])
 
   const handleDelete = async () => {
     if (!deleteId) return

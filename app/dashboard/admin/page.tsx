@@ -1,24 +1,26 @@
-import { redirect } from "next/navigation"
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
 import { cookies } from "next/headers"
+import { redirect } from "next/navigation"
 import { DashboardHeader } from "../dashboard-header"
 import { UserSearch } from "../user-search"
 
 export default async function AdminPage() {
-  const supabase = createServerComponentClient({ cookies })
+  const cookieStore = cookies()
+  const supabase = createServerComponentClient({ cookies: () => cookieStore })
 
-  // Check if user is authenticated
+  // Check if user is authenticated using getUser() for better security
   const {
-    data: { session },
-  } = await supabase.auth.getSession()
+    data: { user },
+    error: userError,
+  } = await supabase.auth.getUser()
 
-  if (!session) {
+  if (userError || !user) {
     redirect("/login")
   }
 
   return (
     <div className="flex min-h-screen flex-col">
-      <DashboardHeader user={session.user} />
+      <DashboardHeader user={user} />
       <main className="flex-1 container mx-auto px-4 py-8">
         <div className="grid gap-8">
           <div>

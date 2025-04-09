@@ -2,15 +2,15 @@
 
 import type React from "react"
 
-import { useState } from "react"
-import { useRouter } from "next/navigation"
-import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { Facebook } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { useToast } from "@/components/ui/use-toast"
 import { Separator } from "@/components/ui/separator"
+import { useToast } from "@/components/ui/use-toast"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { Facebook } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useState } from "react"
 
 export default function LoginForm() {
   const router = useRouter()
@@ -36,6 +36,19 @@ export default function LoginForm() {
         })
 
         if (error) throw error
+
+        // Create user profile after successful signup
+        const response = await fetch("/api/create-user-profile", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        })
+
+        if (!response.ok) {
+          const errorData = await response.json()
+          throw new Error(errorData.error || "Failed to create user profile")
+        }
 
         toast({
           title: "Check your email",
