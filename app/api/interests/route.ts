@@ -30,82 +30,25 @@ export async function POST(request: Request) {
       );
     }
 
-    // First, try to directly insert the interest
+    // Insert the interest with the new schema
     const { error: insertError } = await supabase
       .from("user_interests")
       .insert({
         user_id: user.id,
-        location_id: data.location_id,
+        locations_id: data.locations_id,
+        locations_text: data.locations_text,
         budget: data.budget,
-        priority_level: data.priority_level,
+        duration: data.duration,
         activities: data.activities,
         notes: data.notes,
       });
 
     if (insertError) {
       console.error("Error inserting interest:", insertError);
-
-      // If it's a foreign key constraint error, try a different approach
-      if (insertError.code === "23503") {
-        // Try to determine which table the foreign key references
-        console.log("Foreign key constraint error. Attempting to fix...");
-
-        // Try to create a user entry in a public.users table if it exists
-        try {
-          const { error: createUserError } = await supabase.rpc(
-            "create_user_if_not_exists",
-            {
-              user_id: user.id,
-              user_email: user.email,
-            }
-          );
-
-          if (createUserError) {
-            console.log("Could not create user entry:", createUserError);
-          } else {
-            console.log("Created user entry successfully");
-
-            // Try the insert again
-            const { error: retryError } = await supabase
-              .from("user_interests")
-              .insert({
-                user_id: user.id,
-                location_id: data.location_id,
-                budget: data.budget,
-                priority_level: data.priority_level,
-                activities: data.activities,
-                notes: data.notes,
-              });
-
-            if (retryError) {
-              console.error("Error on retry insert:", retryError);
-              return NextResponse.json(
-                { error: retryError.message },
-                { status: 500 }
-              );
-            }
-
-            return NextResponse.json({ success: true });
-          }
-        } catch (rpcError) {
-          console.log("RPC function not available:", rpcError);
-        }
-
-        // If we get here, we couldn't fix the issue automatically
-        return NextResponse.json(
-          {
-            error:
-              "Foreign key constraint error. The user_id in user_interests is referencing a table where your user ID doesn't exist.",
-            details: insertError.message,
-          },
-          { status: 500 }
-        );
-      } else {
-        return NextResponse.json(
-          { error: insertError.message },
-          { status: 500 }
-        );
-      }
+      return NextResponse.json(
+        { error: insertError.message },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json({ success: true });
@@ -143,23 +86,44 @@ export async function GET(request: Request) {
       );
     }
 
-    // Fetch interests with locations
-    const { data, error } = await supabase
+    // First, fetch the interests
+    const { data: interests, error: interestsError } = await supabase
       .from("user_interests")
-      .select(
-        `
-        *,
-        locations (*)
-      `
-      )
+      .select("*")
       .eq("user_id", user.id);
 
-    if (error) {
-      console.error("Error fetching interests:", error);
-      return NextResponse.json({ error: error.message }, { status: 500 });
+    if (interestsError) {
+      console.error("Error fetching interests:", interestsError);
+      return NextResponse.json({ error: interestsError.message }, { status: 500 });
     }
 
-    return NextResponse.json({ interests: data });
+    // Then, fetch all unique locations used in the interests
+    const locationIds = interests
+      .flatMap(interest => interest.locations_id)
+      .filter((id): id is string => id !== null && id !== undefined);
+
+    let locations: any[] = [];
+    if (locationIds.length > 0) {
+      const { data: locationsData, error: locationsError } = await supabase
+        .from("locations")
+        .select("*")
+        .in("id", locationIds);
+
+      if (locationsError) {
+        console.error("Error fetching locations:", locationsError);
+        return NextResponse.json({ error: locationsError.message }, { status: 500 });
+      }
+
+      locations = locationsData || [];
+    }
+
+    // Combine the data
+    const interestsWithLocations = interests.map(interest => ({
+      ...interest,
+      locations: locations.filter(loc => interest.locations_id.includes(loc.id))
+    }));
+
+    return NextResponse.json({ interests: interestsWithLocations });
   } catch (error: any) {
     console.error("Error in interests API route:", error);
     return NextResponse.json({ error: error.message }, { status: 500 });

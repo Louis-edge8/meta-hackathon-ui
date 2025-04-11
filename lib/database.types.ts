@@ -30,27 +30,30 @@ export interface Database {
         Row: {
           id: string
           user_id: string
-          location_id: string
+          locations_id: string[]
+          locations_text: string
           budget: number
-          priority_level: number
+          duration: number
           activities: string
           notes: string | null
         }
         Insert: {
           id?: string
           user_id: string
-          location_id: string
+          locations_id: string[]
+          locations_text: string
           budget: number
-          priority_level: number
+          duration: number
           activities: string
           notes?: string | null
         }
         Update: {
           id?: string
           user_id?: string
-          location_id?: string
+          locations_id?: string[]
+          locations_text?: string
           budget?: number
-          priority_level?: number
+          duration?: number
           activities?: string
           notes?: string | null
         }

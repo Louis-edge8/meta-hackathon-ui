@@ -9,6 +9,7 @@ import { Separator } from "@/components/ui/separator"
 import { useToast } from "@/components/ui/use-toast"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Facebook } from "lucide-react"
+import Link from "next/link"
 import { useRouter } from "next/navigation"
 import { useState } from "react"
 
@@ -16,7 +17,6 @@ export default function LoginForm() {
   const router = useRouter()
   const { toast } = useToast()
   const [isLoading, setIsLoading] = useState(false)
-  const [isSignUp, setIsSignUp] = useState(false)
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const supabase = createClientComponentClient()
@@ -26,45 +26,15 @@ export default function LoginForm() {
     setIsLoading(true)
 
     try {
-      if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
-          email,
-          password,
-          options: {
-            emailRedirectTo: `${window.location.origin}/auth/callback`,
-          },
-        })
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      })
 
-        if (error) throw error
+      if (error) throw error
 
-        // Create user profile after successful signup
-        const response = await fetch("/api/create-user-profile", {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-        })
-
-        if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error || "Failed to create user profile")
-        }
-
-        toast({
-          title: "Check your email",
-          description: "We've sent you a confirmation link to complete your sign up.",
-        })
-      } else {
-        const { error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        })
-
-        if (error) throw error
-
-        router.refresh()
-        router.push("/dashboard")
-      }
+      router.refresh()
+      router.push("/dashboard")
     } catch (error: any) {
       toast({
         title: "Authentication error",
@@ -122,18 +92,17 @@ export default function LoginForm() {
           />
         </div>
         <Button type="submit" className="w-full" disabled={isLoading}>
-          {isLoading ? "Loading..." : isSignUp ? "Sign Up" : "Sign In"}
+          {isLoading ? "Loading..." : "Sign In"}
         </Button>
       </form>
 
       <div className="text-center">
-        <button
-          type="button"
-          onClick={() => setIsSignUp(!isSignUp)}
+        <Link
+          href="/auth/signup"
           className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
         >
-          {isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up"}
-        </button>
+          Don't have an account? Sign Up
+        </Link>
       </div>
 
       <div className="relative">
