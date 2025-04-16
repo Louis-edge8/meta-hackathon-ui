@@ -381,7 +381,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
             <div className="border rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-medium mb-4">Find tour by Interest</h3>
               {user && <InterestForm locations={locations || []} userId={user.id} />}
