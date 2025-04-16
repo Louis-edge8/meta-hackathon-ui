@@ -27,9 +27,11 @@ interface InterestWithLocations extends UserInterest {
 interface InterestsListProps {
   userId: string
   initialInterests: InterestWithLocations[]
+  onSearch?: (interest: InterestWithLocations) => Promise<void>
+  searchingInterestId?: string | null
 }
 
-export function InterestsList({ userId, initialInterests }: InterestsListProps) {
+export function InterestsList({ userId, initialInterests, onSearch, searchingInterestId: externalSearchingId }: InterestsListProps) {
   const router = useRouter()
   const { toast } = useToast()
   const supabase = createClientComponentClient()
@@ -133,21 +135,38 @@ export function InterestsList({ userId, initialInterests }: InterestsListProps) 
     setSearchingInterestId(interest.id);
     try {
       console.log('Interest being searched:', interest)
-      console.log('Interest ID:', interest.id)
-      console.log('Interest locations:', interest.locations)
-      console.log('Interest locations_text:', interest.locations_text)
 
-      // Update URL with interest ID
-      router.push(`/dashboard?interest_id=${interest.id}`);
-      console.log('URL updated with interest ID:', interest.id)
+      // Scroll to results immediately for better user experience
+      const resultsSection = document.getElementById('search-results-section')
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+
+      if (onSearch) {
+        // Use the parent component's search handler if provided
+        await onSearch(interest);
+        setTimeout(() => {
+          setSearchingInterestId(null);
+        }, 1000);
+      } else {
+        // Fallback to the original event dispatch method
+        const searchEvent = new CustomEvent('search-interest', {
+          detail: { interest }
+        });
+        window.dispatchEvent(searchEvent);
+
+        // Keep search button in loading state for a short period
+        setTimeout(() => {
+          setSearchingInterestId(null);
+        }, 1000);
+      }
     } catch (error: any) {
-      console.error("Error updating URL:", error);
+      console.error("Error triggering search:", error);
       toast({
         title: "Error",
-        description: "Failed to update search parameters",
+        description: "Failed to trigger search",
         variant: "destructive",
       });
-    } finally {
       setSearchingInterestId(null);
     }
   };
@@ -222,9 +241,9 @@ export function InterestsList({ userId, initialInterests }: InterestsListProps) 
                     size="sm"
                     className="text-xs py-1 h-7"
                     onClick={() => handleSearch(interest)}
-                    disabled={searchingInterestId === interest.id}
+                    disabled={searchingInterestId === interest.id || externalSearchingId === interest.id}
                   >
-                    {searchingInterestId === interest.id ? (
+                    {(searchingInterestId === interest.id || externalSearchingId === interest.id) ? (
                       <Loader2 className="h-3 w-3 animate-spin mr-1" />
                     ) : null}
                     Search

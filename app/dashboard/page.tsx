@@ -1,110 +1,193 @@
+"use client"
+
 import type { Location } from "@/lib/database.types"
-import { getUserInterestsWithLocations } from "@/lib/services/interests"
-import { searchPackages } from "@/lib/services/search-packages"
-import { createServerComponentClient } from "@supabase/auth-helpers-nextjs"
-import { cookies } from "next/headers"
-import { redirect } from "next/navigation"
+import type { User } from "@supabase/auth-helpers-nextjs"
+import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
+import { Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
+import { useEffect, useState } from "react"
 import { DashboardHeader } from "./dashboard-header"
 import { InterestForm } from "./interest-form"
 import { InterestsList } from "./interests-list"
 import { SearchResultsWrapper } from "./search-results-wrapper"
 
-export default async function DashboardPage({
-  searchParams,
-}: {
-  searchParams: { [key: string]: string | string[] | undefined }
-}) {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient({ cookies: () => cookieStore })
+export default function DashboardPage() {
+  const router = useRouter()
+  const supabase = createClientComponentClient()
 
-  // Check if user is authenticated using getUser() for better security
-  const {
-    data: { user },
-    error: userError,
-  } = await supabase.auth.getUser()
+  const [user, setUser] = useState<User | null>(null)
+  const [locations, setLocations] = useState<Location[]>([])
+  const [interests, setInterests] = useState<any[]>([])
+  const [isLoading, setIsLoading] = useState(true)
+  const [interestId, setInterestId] = useState<string | null>(null)
+  const [searchResults, setSearchResults] = useState<Record<string, any[]>>({})
+  const [interestLocations, setInterestLocations] = useState<Record<string, string>>({})
 
-  if (userError || !user) {
-    redirect("/login")
+  // Check auth and fetch initial data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        // Check auth
+        const { data: { user: authUser }, error: authError } = await supabase.auth.getUser()
+
+        if (authError || !authUser) {
+          router.push("/login")
+          return
+        }
+
+        setUser(authUser)
+
+        // Fetch locations
+        const { data: locationsData } = await supabase
+          .from("locations")
+          .select("*")
+          .order("name")
+
+        setLocations(locationsData || [])
+
+        // Fetch interests
+        const response = await fetch(`/api/interests?userId=${authUser.id}`)
+
+        if (response.ok) {
+          const data = await response.json()
+
+          // Fetch locations for each interest if needed
+          const interestsWithLocations = await Promise.all(
+            data.interests.map(async (interest: any) => {
+              if (interest.locations_id.length > 0) {
+                const { data: locData } = await supabase
+                  .from('locations')
+                  .select('*')
+                  .in('id', interest.locations_id)
+
+                return {
+                  ...interest,
+                  locations: locData || []
+                }
+              }
+              return {
+                ...interest,
+                locations: []
+              }
+            })
+          )
+
+          setInterests(interestsWithLocations)
+        }
+      } catch (error) {
+        console.error("Error fetching initial data:", error)
+      } finally {
+        setIsLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [supabase, router])
+
+  // Handle search
+  const handleSearch = async (interest: any) => {
+    if (!interest) return
+
+    // Set the interest ID being searched
+    setInterestId(interest.id)
+
+    // Scroll to results section immediately
+    const resultsSection = document.getElementById('search-results-section')
+    if (resultsSection) {
+      resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+
+      if (!session) {
+        throw new Error("User not authenticated")
+      }
+
+      // Call API directly since searchPackages is a server component function
+      const API_URL = "https://hackathon-travel-buddy-pb.onrender.com/search-travel-packages"
+
+      const response = await fetch(`${API_URL}?authorization=${encodeURIComponent(`Bearer ${session.access_token}`)}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "accept": "application/json",
+          "cache-control": "no-cache",
+          "pragma": "no-cache"
+        },
+        body: JSON.stringify({ ...interest, match_count: 3 }),
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to search packages')
+      }
+
+      const data = await response.json()
+      const packages = data.packages || data.data || data || []
+
+      // Replace previous results for this interest (not append)
+      setSearchResults(prev => {
+        const newResults = { ...prev }
+        newResults[interest.id] = packages
+        return newResults
+      })
+
+      setInterestLocations(prev => {
+        const newLocations = { ...prev }
+        newLocations[interest.id] = interest.locations_text
+        return newLocations
+      })
+
+    } catch (error) {
+      console.error('Error searching packages:', error)
+    } finally {
+      // Ensure interestId is set to null after search completes to stop the spinner
+      setTimeout(() => {
+        setInterestId(null)
+      }, 500)
+    }
   }
 
-  // Fetch locations for the dropdown
-  const { data: locations } = await supabase.from("locations").select("*").order("name")
-
-  // Fetch user interests with locations using the service function
-  const interests = await getUserInterestsWithLocations(user.id)
-  console.log('Fetched interests:', interests)
-
-  // Handle search parameter
-  let searchResults = {}
-  let interestLocations = {}
-
-  const interestId = searchParams.interest_id as string
-  console.log('Search params:', searchParams)
-  console.log('Interest ID from URL:', interestId)
-
-  if (interestId && interests) {
-    // Find the interest
-    const interest = interests.find(i => i.id === interestId)
-    console.log('Found interest:', interest)
-
-    if (interest) {
-      try {
-        const searchParams = {
-          location_input: interest.locations_text,
-          budget_input: interest.budget.toString(),
-          activities_input: interest.activities,
-          notes_input: interest.notes || "",
-          match_count: 3,
-        }
-        console.log('Making API call with params:', searchParams)
-
-        // Call the search packages API
-        const packages = await searchPackages(searchParams)
-        console.log('Received packages:', packages)
-
-        searchResults = {
-          [interestId]: packages
-        }
-
-        interestLocations = {
-          [interestId]: interest.locations_text
-        }
-      } catch (error: any) {
-        console.error('Error searching packages:', error)
-        // You might want to show this error to the user
-      }
-    } else {
-      console.error('No interest found with ID:', interestId)
-    }
-  } else {
-    console.log('No interest ID in URL or no interests found')
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <Loader2 className="h-12 w-12 animate-spin text-gray-400" />
+      </div>
+    )
   }
 
   return (
     <div className="flex min-h-screen flex-col">
-      <DashboardHeader user={user} />
+      {user && <DashboardHeader user={user} />}
       <main className="flex-1 container mx-auto px-4 pb-8">
         <div className="grid gap-8 border-2 border-gray-200 dark:border-gray-700">
           <div className="grid grid-cols-12">
             <div className="col-span-6 space-y-6 border-r-2 border-gray-200 dark:border-gray-700">
               <div className="py-6 px-8">
                 <h2 className="text-xl font-semibold mb-4">Add New Travel Interest</h2>
-                <InterestForm locations={(locations as Location[]) || []} userId={user.id} />
+                {user && <InterestForm locations={locations || []} userId={user.id} />}
               </div>
             </div>
             <div className="col-span-6 space-y-6">
               <div className="py-6 px-8">
                 <h2 className="text-xl font-semibold mb-4">Your Travel Interests</h2>
-                <InterestsList userId={user.id} initialInterests={interests} />
+                {user && <InterestsList
+                  userId={user.id}
+                  initialInterests={interests}
+                  onSearch={handleSearch}
+                  searchingInterestId={interestId}
+                />}
               </div>
             </div>
 
             <div className="col-span-12 border-t-2 border-gray-200 dark:border-gray-700 p-8">
               <h2 className="text-xl font-semibold mb-4">Search Results</h2>
-              <div >
+              <div className="min-h-[200px]">
                 <SearchResultsWrapper
                   results={searchResults}
+                  interest={interests.find(interest => interest.id === interestId)}
                   interestLocations={interestLocations}
+                  currentInterestId={interestId}
                 />
               </div>
             </div>

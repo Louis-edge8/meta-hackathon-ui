@@ -34,7 +34,7 @@ export async function searchPackages(params: SearchPackagesParams): Promise<Pack
     throw new Error("User not authenticated");
   }
 
-  const API_URL = "https://hackathon-travel-buddy-pb.onrender.com/search-travel-packages";
+  const API_URL = "https://hackathon-travel-buddy-pb.fly.dev/search-travel-packages";
 
   try {
     const response = await fetch(`${API_URL}?authorization=${encodeURIComponent(`Bearer ${session.access_token}`)}`, {
