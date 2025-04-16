@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card"
 import {
     Dialog,
     DialogContent,
+    DialogTitle,
 } from "@/components/ui/dialog"
 import { Separator } from "@/components/ui/separator"
 import { Package } from "@/lib/services/search-packages"
@@ -155,7 +156,7 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                                 <ArrowLeft className="w-5 h-5" />
                                 <span className="sr-only">Back</span>
                             </Button>
-                            <h1 className="text-lg font-semibold">Tour Package Preview</h1>
+                            <DialogTitle className="text-lg font-semibold">Tour Package Preview</DialogTitle>
                         </div>
                     </header>
 

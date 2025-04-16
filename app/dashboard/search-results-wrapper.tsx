@@ -1,5 +1,6 @@
 "use client"
 
+import { Button } from "@/components/ui/button"
 import type { Package } from "@/lib/services/search-packages"
 import { UserInterest } from "@/lib/types"
 import { Loader2 } from "lucide-react"
@@ -30,30 +31,41 @@ export function SearchResultsWrapper({
 
     if (!isLoading && currentInterestId && !results[currentInterestId]) {
         return (
-            <div ref={resultsRef} id="search-results-section">
-                <div className="flex flex-col items-center justify-center py-12">
-                    <p className="text-gray-500 dark:text-gray-400">
+            <div ref={resultsRef} id="search-results-section" className="flex-1 flex flex-col">
+                <div className="flex flex-col items-center justify-center py-12 flex-1">
+                    <p className="text-gray-500 dark:text-gray-400 mb-6">
                         No results found for this interest.
                     </p>
+                    <Button
+                        onClick={() => {
+                            const section2 = document.getElementById('section-2');
+                            section2?.scrollIntoView({ behavior: 'smooth' });
+                        }}
+                        className="bg-orange-500 hover:bg-orange-600 text-white"
+                    >
+                        Back to Interests
+                    </Button>
                 </div>
             </div>
         );
     }
     return (
-        <div ref={resultsRef} id="search-results-section">
+        <div ref={resultsRef} id="search-results-section" className="flex-1 flex flex-col">
             {isLoading ? (
-                <div className="flex flex-col items-center justify-center py-12">
+                <div className="flex flex-col items-center justify-center py-12 flex-1">
                     <Loader2 className="h-12 w-12 animate-spin text-gray-400 mb-4" />
                     <p className="text-gray-500 dark:text-gray-400">
                         Searching for perfect travel packages...
                     </p>
                 </div>
             ) : (
-                <SearchResults
-                    results={currentInterestId ? results[currentInterestId] : []}
-                    interest={interest}
-                    interestLocations={interestLocations}
-                />
+                <div className="flex-1">
+                    <SearchResults
+                        results={currentInterestId ? results[currentInterestId] : []}
+                        interest={interest}
+                        interestLocations={interestLocations}
+                    />
+                </div>
             )}
         </div>
     );

@@ -8,7 +8,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import { Package } from "@/lib/services/search-packages"
-import { Calendar, Clock, MapPin, Ship, Star, Users } from 'lucide-react'
+import { Calendar, Clock, MapPin, Ship, Star, Users, Wand2 } from 'lucide-react'
 import Image from "next/image"
 import { ReactNode } from "react"
 import ReactMarkdown from 'react-markdown'
@@ -60,16 +60,11 @@ export function PackageDetails({
                 onWheel={(e) => e.stopPropagation()}
             >
                 <DialogHeader className="pb-2 border-b">
-                    <DialogTitle className="text-xl font-semibold">
+                    <DialogTitle className="text-xl font-semibold flex items-center gap-2">
                         {pkg.title}
                         {'isAIGenerated' in pkg && pkg.isAIGenerated && (
-                            <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M15.5 9L15.6716 9.17157C17.0049 10.5049 17.6716 11.1716 17.6716 12C17.6716 12.8284 17.0049 13.4951 15.6716 14.8284L15.5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                    <path d="M13.5 7L13.6716 7.17157C16.0049 9.50491 17.1716 10.6716 17.1716 12C17.1716 13.3284 16.0049 14.4951 13.6716 16.8284L13.5 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                    <path d="M10.5 15L10.3284 14.8284C8.99509 13.4951 8.32843 12.8284 8.32843 12C8.32843 11.1716 8.99509 10.5049 10.3284 9.17157L10.5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                    <path d="M8.5 17L8.32843 16.8284C5.99509 14.4951 4.82843 13.3284 4.82843 12C4.82843 10.6716 5.99509 9.50491 8.32843 7.17157L8.5 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-                                </svg>
+                            <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-medium backdrop-blur-sm bg-purple-500/70 text-white">
+                                <Wand2 className="h-3 w-3" />
                                 Created By AI
                             </span>
                         )}
@@ -142,7 +137,7 @@ export function PackageDetails({
 
                         <div className="bg-gray-50 p-4 rounded-lg">
                             <h3 className="font-medium text-md mb-2 flex items-center gap-2">
-                                <span className="inline-block w-5 h-5 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center text-xs">i</span>
+                                <span className="inline-block w-5 h-5 rounded-full bg-blue-100 text-blue-600 items-center justify-center text-xs">i</span>
                                 Overview
                             </h3>
                             <div className="text-sm text-gray-700 prose prose-sm max-w-none">
@@ -153,7 +148,7 @@ export function PackageDetails({
                         {pkg.highlights && pkg.highlights.length > 0 && (
                             <div>
                                 <h4 className="font-medium mb-2 flex items-center gap-2">
-                                    <span className="inline-block w-5 h-5 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center text-xs">★</span>
+                                    <span className="inline-block w-5 h-5 rounded-full bg-amber-100 text-amber-600 items-center justify-center text-xs">★</span>
                                     Highlights
                                 </h4>
                                 <ul className="list-disc list-inside text-sm text-gray-600 pl-2 space-y-1">

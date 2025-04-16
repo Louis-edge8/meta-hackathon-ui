@@ -103,31 +103,62 @@ export default function DashboardPage() {
         throw new Error("User not authenticated")
       }
 
-      // Call API directly since searchPackages is a server component function
-      const API_URL = "https://hackathon-travel-buddy-pb.onrender.com/search-travel-packages"
-
-      const response = await fetch(`${API_URL}?authorization=${encodeURIComponent(`Bearer ${session.access_token}`)}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "accept": "application/json",
-          "cache-control": "no-cache",
-          "pragma": "no-cache"
+      // Transform mock data to match expected Package format
+      const mockPackages = [
+        {
+          id: 'mock-1',
+          title: "Classic Ha Long Bay Cruise Experience",
+          description: "Embark on a traditional junk boat cruise through Ha Long Bay's limestone karsts. Enjoy kayaking, cave exploration, and fresh seafood dining with stunning sunset views.",
+          duration: 3,
+          price: 450.0,
+          accommodation: [{
+            name: "Traditional Junk Boat Cabin",
+            type: "Cruise Ship",
+            description: "Comfortable cabin with traditional Vietnamese decor, private bathroom, and ocean views",
+            price_range: "$150-200 per night"
+          }],
+          isAIGenerated: false,
+          location_input: interest.locations_text,
+          activities: "Cave exploration, kayaking, cooking class, sunset viewing, swimming"
         },
-        body: JSON.stringify({ ...interest, match_count: 3 }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to search packages')
-      }
-
-      const data = await response.json()
-      const packages = data.packages || data.data || data || []
+        {
+          id: 'mock-2',
+          title: "Ha Long Bay Ultimate Adventure & Luxury Experience",
+          description: "AI-curated journey combining adventure and luxury in Ha Long Bay. Features exclusive access to hidden caves, private seaplane tour, luxury cruise accommodation, and personalized cultural experiences.",
+          duration: 4,
+          price: 899.0,
+          accommodation: [{
+            name: "Premium Paradise Luxury Cruise",
+            type: "Luxury Cruise",
+            description: "5-star cruise ship with premium suites, private balconies, spa facilities, and gourmet dining options",
+            price_range: "$300-400 per night"
+          }],
+          isAIGenerated: true,
+          location_input: interest.locations_text,
+          activities: "Seaplane tour, private cave exploration, luxury spa treatments, gourmet cooking class, night squid fishing, sunrise tai chi"
+        },
+        {
+          id: 'mock-3',
+          title: "Ha Long Bay Family Adventure Package",
+          description: "Perfect for families! Explore Ha Long Bay with kid-friendly activities, educational tours, and comfortable family-sized accommodations. Includes special children's programs and family bonding experiences.",
+          duration: 3,
+          price: 599.0,
+          accommodation: [{
+            name: "Family Suite - Era Cruises",
+            type: "Cruise Ship",
+            description: "Spacious family suite with connecting rooms, child-safety features, and family amenities",
+            price_range: "$250-300 per night"
+          }],
+          isAIGenerated: false,
+          location_input: interest.locations_text,
+          activities: "Family kayaking, kid's cooking class, beach picnics, educational cave tours, family movie nights"
+        }
+      ];
 
       // Replace previous results for this interest (not append)
       setSearchResults(prev => {
         const newResults = { ...prev }
-        newResults[interest.id] = packages
+        newResults[interest.id] = mockPackages
         return newResults
       })
 

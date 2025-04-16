@@ -266,7 +266,7 @@ export function InterestsList({ userId, initialInterests, onSearch, searchingInt
         <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
           <AlertDialogContent>
             <AlertDialogHeader>
-              <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+              <AlertDialogTitle>Delete Travel Interest</AlertDialogTitle>
               <AlertDialogDescription>
                 This will permanently delete this travel interest. This action cannot be undone.
               </AlertDialogDescription>

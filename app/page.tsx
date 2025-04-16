@@ -156,48 +156,66 @@ export default function HomePage() {
         throw new Error("User not authenticated")
       }
 
-      // Call API directly
-      const API_URL = "https://hackathon-travel-buddy-pb.fly.dev/suggest-tour"
-
-      const response = await fetch(`${API_URL}?authorization=${encodeURIComponent(`Bearer ${session.access_token}`)}`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "accept": "application/json",
-          "Authorization": `Bearer ${session.access_token}`,
-          "cache-control": "no-cache",
-          "pragma": "no-cache"
+      // Transform mock data to match expected Package format
+      const mockPackages = [
+        {
+          "id": "deb27ab4-56d0-422e-a9a9-b5fcaed455f3",
+          "title": "Ha Long Escape: 2-Day Cruise Adventure",
+          "provider_id": "047d4c0e-7088-4a2a-aaca-7a8d32c90117",
+          "location_id": "862d50a4-f172-4fc2-b2bc-9ba2eb45ae85",
+          "price": 289.0,
+          "duration_days": 2,
+          "highlights": ["cruise", "cave", "local cuisine"],
+          "description": "# 🚤 Ha Long Bay – *2-Day Cruise Adventure: Mystic Waters, Hidden Caves*\n\n**Duration:** 2 Days  \n**Trip Type:** Overnight cruise, soft adventure  \n**Ideal For:** Couples, photographers, weekend explorers  \n**Best Season:** October–April *(cool breeze, calm waters)*\n\n---\n\n## 🧭 Overview\n\nShort on time, but dreaming of Ha Long Bay? This 2-day overnight cruise offers a stunning getaway into **Vietnam's mythical seascape**. Glide past towering limestone cliffs, kayak into hidden lagoons, and dine beneath the stars. It's a short trip — but the memories will linger.\n\n---\n\n## 📅 Itinerary Breakdown\n\n### **Day 1: Cast Off & Cave Exploration**\n\n- **08:00** – Depart from **Hanoi** in a luxury limousine van *(Wi-Fi on board)*  \n- **12:00** – Arrive at the marina and board your **traditional wooden junk** cruise  \n- **13:00** – Enjoy a **fresh seafood lunch** while sailing through scenic formations like **Fighting Cock Islet** and **Dog Islet**  \n- **15:00** – Discover **Sung Sot Cave**, the bay’s largest cavern with natural light shows and stalactite formations  \n- **16:30** – Choose your adventure:\n  - 🚣‍♂️ **Kayak into Luon Cave**, a hidden grotto of emerald water  \n  - 🛶 Take a **bamboo boat ride** rowed by locals  \n- **18:00** – Return to the deck for a **Vietnamese cooking class** at sunset  \n- **19:30** – Dine on a **rooftop seafood BBQ** with wine and open-air views  \n- **21:00** – Optional activities: *squid fishing*, *movies*, or *stargazing*\n\n---\n\n### **Day 2: Sunrise, Tai Chi, and Ti Top Views**\n\n- **06:30** – Greet the morning with **Tai Chi on deck**, surrounded by rising karsts  \n- **07:30** – Light breakfast on board  \n- **08:30** – Explore **Ti Top Island**:\n  - 🧗‍♂️ Hike 400 steps for a **panoramic view of the bay**  \n  - 🏖 Relax on the sandy beach and enjoy a swim  \n- **10:00** – Light brunch and packing  \n- **11:30** – Disembark and transfer back to Hanoi, arriving around **15:00**\n\n---\n\n## 🚐 What’s Included\n\n- ✅ Hanoi ↔ Ha Long luxury van transfers (Wi-Fi included)  \n- ✅ Private cabin with en-suite bathroom  \n- ✅ All meals, activities, and entrance fees  \n- ✅ English-speaking cruise guide  \n- ✅ Kayak or bamboo boat activity\n\n---\n\n## 🧳 What to Pack\n\n- 👙 Swimwear  \n- 🩴 Sandals or flip-flops  \n- 📷 Camera + battery  \n- 🎒 Waterproof backpack\n\n---\n\n> *Even with only two days, you'll leave with a head full of misty peaks, and a heart full of calm.*",
+          "image_url": "https://thesinhtour.com/wp-content/uploads/2023/11/Grand-Pioneers-Cruise-1.jpg",
+          "interested_count": 14,
+          "isAIGenerated": false
         },
-        body: JSON.stringify({
-          location_input: interest.locations_text || "",
-          budget_input: "mid-range",  // Default to mid-range if not specified
-          accommodation_input: interest.accommodation || "standard",
-          activities_input: interest.activity || "",
-          num_participants: parseInt(interest.num_participants) || 1,
-          preferred_activities: interest.activity || "",
-          accommodation_preference: interest.accommodation || "standard",
-          budget_range: interest.budget || "$500-$1000",
-          duration_adjustment: "around 5 days",  // Default value
-          match_count: 3
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Failed to search packages')
-      }
-
-      const data = await response.json()
-      const packages = data.packages || data.data || data || []
-
-      // Add "Created By AI" badge to one of the packages
-      if (packages.length > 0) {
-        packages[packages.length - 1].isAIGenerated = true;
-      }
+        {
+          "id": "6d661e81-22d8-4927-b471-758e7dd045d4",
+          "title": "Limestone Dreams: 4-Day Immersive Retreat",
+          "provider_id": "047d4c0e-7088-4a2a-aaca-7a8d32c90117",
+          "location_id": "862d50a4-f172-4fc2-b2bc-9ba2eb45ae85",
+          "price": 679.9,
+          "duration_days": 4,
+          "highlights": ["hiking", "bay", "cultural show"],
+          "description": "# 🌄 Ha Long Bay – *Limestone Dreams: A 4-Day Immersive Retreat*\n\n**Duration:** 4 Days  \n**Trip Type:** Cruise, culture, nature retreat  \n**Ideal For:** Travelers seeking deeper connection with nature and people  \n**Best Season:** November–March *(cooler climate, fewer crowds)*\n\n---\n\n## 🧭 Overview\n\nStep into a slower rhythm. This 4-day journey offers the **essence of Ha Long** through its landscapes and local life. It blends peaceful cruises with onshore stays at eco-lodges, featuring village walks, folk arts, and forest trails. For those who want more than just views — this is the soul of the bay.\n\n---\n\n## 📅 Itinerary Breakdown\n\n### **Day 1: Cruise into the Bay**\n\n- **08:00** – Hotel pickup from **Hanoi**  \n- **12:00** – Welcome aboard your **Ha Long cruise**, check-in and safety briefing  \n- **13:30** – Feast on a **traditional Vietnamese lunch** as you sail into the heart of Ha Long Bay  \n- **15:00** – Visit **Sung Sot Cave**, filled with natural rock sculptures and light-filtered chambers  \n- **16:30** – Paddle or cruise around **Luon Cave**  \n- **19:00** – Join a **cooking workshop**, then enjoy a multi-course **Vietnamese dinner** on deck\n\n### **Day 2: Life Among Locals**\n\n- **06:30** – Wake up for Tai Chi and sunrise photos  \n- **08:00** – Cruise to **Vung Vieng Floating Village**: meet local fishermen and explore with bamboo boats  \n- **12:00** – Disembark and transfer to an **eco-lodge retreat** in a forest-fringed village  \n- **15:00** – Participate in hands-on activities: **make rice paper**, enjoy **herbal foot baths**  \n- **18:30** – **Cultural dinner** with a live performance of **folk music and dance**\n\n### **Day 3: Forest Trails & Hidden Hills**\n\n- **08:00** – Hike **Bai Tho Mountain** (Poem Mountain) for spectacular views of the bay  \n- **12:00** – Picnic in a forest clearing near a tranquil lake  \n- **15:00** – Optional cycling tour to a nearby village  \n- **18:00** – Dine with your hosts and unwind in hammocks under the stars\n\n### **Day 4: Local Farewells**\n\n- **07:00** – Morning walk in the fields and local market  \n- **08:30** – Light breakfast  \n- **10:00** – Transfer back to Ha Long City and then Hanoi\n\n---\n\n## 🚐 What’s Included\n\n- ✅ 1-night Ha Long cruise with activities  \n- ✅ 2-night eco-lodge with full board  \n- ✅ Roundtrip transfers from Hanoi  \n- ✅ Cave, village, and hiking experiences  \n- ✅ Cultural show, cooking class, kayaking\n\n---\n\n## 🧳 What to Pack\n\n- 👟 Walking shoes or hiking sandals  \n- 🧣 Lightweight long sleeves for temples and caves  \n- 📸 Camera or sketchbook  \n- 🧴 Bug spray & sunscreen\n\n---\n\n> *In these quiet corners of Ha Long, every step becomes a story.*",
+          "image_url": "https://media.istockphoto.com/id/186977241/photo/floating-village-near-rock-islands-in-halong-bay.jpg?s=612x612&w=0&k=20&c=9OKlFCq3JJIKwe7KThPLf33NCczlwhzxuuNiaM-e2Qs=",
+          "interested_count": 14,
+          "isAIGenerated": true
+        },
+        {
+          "id": "fdf3385d-7673-4f48-aa52-dfbae3fe7aab",
+          "title": "Ha Long Highlights: 1-Day Scenic Tour",
+          "provider_id": "047d4c0e-7088-4a2a-aaca-7a8d32c90117",
+          "location_id": "862d50a4-f172-4fc2-b2bc-9ba2eb45ae85",
+          "price": 165.5,
+          "duration_days": 1,
+          "highlights": ["photo spots", "beach", "speedboat"],
+          "description": "# 🏖 Ha Long Bay – *1-Day Highlights: Iconic Views, Caves & Beach Bliss*\n\n**Duration:** 1 Day  \n**Trip Type:** Speedboat cruise, soft adventure, day tour  \n**Ideal For:** Time-strapped travelers, weekenders, families  \n**Best Season:** All year *(especially March–May & September–November)*\n\n---\n\n## 🧭 Overview\n\nPressed for time but still want to see the magic of Ha Long? This **full-day express tour** delivers a punch: cruise past signature islets, dive into a glowing cave, hike a viewpoint, and cool off with a beach swim — all in a single, smooth ride from Hanoi.\n\n---\n\n## 📅 Itinerary Breakdown\n\n### **07:00 – Pickup from Hanoi**\n- Air-conditioned van with comfortable seats and Wi-Fi\n\n### **10:00 – Welcome aboard**\n- Arrive at Tuan Chau Harbor and board a modern **day cruise**\n\n### **10:30 – Scenic Sailing**\n- Glide past **Fighting Cock Islet**, **Dog Islet**, and other iconic karsts  \n- Sip tea on the open deck while soaking in the views\n\n### **12:00 – Onboard Seafood Lunch**\n- Dine on fresh shrimp, clams, tofu with tomato, sautéed vegetables, and seasonal fruit\n\n### **13:30 – Cave and Island Adventure**\n- Walk through **Sung Sot Cave**, filled with massive chambers and light shafts  \n- Continue to **Ti Top Island**:\n  - 🧗‍♀️ Hike up for a panoramic vista  \n  - 🏊‍♂️ Or take a dip on the crescent-shaped beach\n\n### **15:30 – Cruise Return**\n- Relax and reflect with complimentary drinks as you head back to shore\n\n### **16:30 – Return to Hanoi**\n- Estimated arrival time: **19:30**\n\n---\n\n## 🚐 What’s Included\n\n- ✅ Roundtrip transfers from Hanoi  \n- ✅ Full-day modern cruise  \n- ✅ Seafood lunch  \n- ✅ Sung Sot Cave & Ti Top Island entrance fees  \n- ✅ English-speaking guide\n\n---\n\n## 🧳 What to Pack\n\n- 👕 Extra t-shirt  \n- 🩱 Swimwear & towel  \n- 📷 Camera or phone gimbal  \n- 🧢 Cap or hat\n\n---\n\n> *One day. A thousand photos. And a lifetime of awe.*",
+          "image_url": "https://ehgtravel.com/wp-content/uploads/2018/04/halongbay03.jpg",
+          "interested_count": 16,
+          "isAIGenerated": true
+        },
+        {
+          "id": "6f8a5582-60df-4b92-ba63-e60e66336f4b",
+          "title": "Complete Ha Long Experience: 5-Day Ultimate Mix",
+          "provider_id": "047d4c0e-7088-4a2a-aaca-7a8d32c90117",
+          "location_id": "862d50a4-f172-4fc2-b2bc-9ba2eb45ae85",
+          "price": 859.99,
+          "duration_days": 5,
+          "highlights": ["cruise", "cave", "cultural show", "beach", "local cuisine"],
+          "description": "# 🌟 Ha Long Bay – *Complete Experience: The Best of All Worlds*\n\n**Duration:** 5 Days  \n**Trip Type:** Cruise, cultural immersion, beach getaway  \n**Ideal For:** Explorers, couples, photographers, and families  \n**Best Season:** October–April *(clear skies, vibrant landscapes)*\n\n---\n\n## 🧭 Overview\n\nIf you've ever dreamed of experiencing **Ha Long Bay in all its glory**, this is your dream itinerary. Combining the best of cruising, culture, adventure, and relaxation, this 5-day journey brings together hidden caves, floating villages, forested peaks, seafood feasts, and white-sand beaches. You'll explore at sea, on land, and through the stories of the locals.\n\n---\n\n## 📅 Itinerary Breakdown\n\n### **Day 1: Arrival & Cruise Welcome**\n- **07:30** – Transfer from **Hanoi** to Ha Long in luxury van  \n- **12:00** – Board your **premium cruise**: welcome drinks and check-in  \n- **13:00** – **Lunch on board** while sailing through iconic limestone formations  \n- **15:00** – Visit **Sung Sot Cave**, Ha Long's largest cave  \n- **17:00** – Enjoy a **cooking class** and sunset cocktails  \n- **19:00** – **Seafood BBQ dinner** under the stars\n\n### **Day 2: Nature & Local Life**\n- **06:30** – **Tai Chi session** on deck  \n- **08:00** – Visit **Cua Van floating village** by bamboo boat  \n- **14:00** – Disembark for an overnight stay at a **local eco-lodge**  \n- **18:00** – **Cultural dinner** with music and traditional games\n\n### **Day 3: Mountain & Beach Escape**\n- **09:00** – Hike **Bai Tho Mountain** for sweeping bay views  \n- **13:00** – Swim and relax on **Bai Chay Beach**  \n- **15:00** – Beach picnic with tropical fruits and seafood\n\n### **Day 4: Hidden Corners & Speedboat Thrills**\n- **08:30** – Speedboat to **Lan Ha Bay** and **Dark & Bright Cave**  \n- **11:00** – Kayak through **hidden lagoons**  \n- **17:00** – Return to cruise for sunset celebration and cocktail hour\n\n### **Day 5: Sunrise Farewell**\n- **06:00** – Sunrise cruise & light breakfast  \n- **08:00** – Stop at **Ti Top Island** for a final climb and swim  \n- **11:00** – Disembark and return to Hanoi by **15:30**\n\n---\n\n## 🚐 What's Included\n\n- ✅ All transfers from/to Hanoi  \n- ✅ 2 nights on cruise, 2 nights in eco-lodge  \n- ✅ All meals, entrance fees, and local guides  \n- ✅ Kayaking, bamboo boat, cooking class, cultural show  \n- ✅ Hiking, speedboat, Tai Chi, beach time\n\n---\n\n## 🧳 What to Pack\n\n- 🩱 Swimsuit & sandals  \n- 🧢 Hat & sunscreen  \n- 🎒 Waterproof bag  \n- 📷 Camera/drone *(check local restrictions)*\n\n---\n\n> *From sunrise on deck to starlit dinners, from hidden caves to mountain peaks — this is the Ha Long experience, complete and unforgettable.*",
+          "image_url": "https://media-cdn-v2.laodong.vn/Storage/NewsPortal/2023/3/9/1155741/Du-Lich-Vinh-Ha-Long-01.jpg",
+          "interested_count": 17,
+          "isAIGenerated": true
+        }
+      ]
 
       // Replace previous results for this interest (not append)
       setSearchResults(prev => {
         const newResults = { ...prev }
-        newResults[interest.id] = packages
+        newResults[interest.id] = mockPackages
         return newResults
       })
 
@@ -414,7 +432,7 @@ export default function HomePage() {
 
       {/* Section 3: Search Results */}
       <section id="section-3" className="min-h-screen flex flex-col snap-start">
-        <div className="container mx-auto p-6 flex-1">
+        <div className="container mx-auto p-6 flex-1 flex flex-col">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-orange-600 to-red-600 bg-clip-text text-transparent py-2">
               Search Results
@@ -424,7 +442,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="bg-white p-6 rounded-lg shadow-sm">
+          <div className="bg-white p-6 rounded-lg shadow-sm flex-1 flex flex-col">
             {interestId && interests.find(i => i.id === interestId) ? (
               <SearchResultsWrapper
                 results={searchResults}
@@ -451,10 +469,19 @@ export default function HomePage() {
                 })}
               </>
             ) : (
-              <div className="text-center py-6 text-gray-500">
+              <div className="text-center py-6 text-gray-500 flex-1 flex flex-col items-center justify-center">
                 <p>Search for matching tours from the interest section above.</p>
                 <p>Find relevant tours including an AI-generated recommendation.</p>
-                <p>AI-generated tours will be highlighted with a "Created By AI" badge.</p>
+                <p className="mb-6">AI-generated tours will be highlighted with a "Created By AI" badge.</p>
+                <Button
+                  onClick={() => {
+                    const section2 = document.getElementById('section-2');
+                    section2?.scrollIntoView({ behavior: 'smooth' });
+                  }}
+                  className="bg-orange-500 hover:bg-orange-600 text-white"
+                >
+                  Go to Interests
+                </Button>
               </div>
             )}
           </div>
