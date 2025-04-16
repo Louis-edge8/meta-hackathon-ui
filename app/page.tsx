@@ -312,20 +312,20 @@ export default function HomePage() {
         <div className="container mx-auto p-6 flex-1">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent py-2">
-              Travel Interests & Criteria
+              Travel Tour Discovery
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
               Define your travel preferences to find your perfect journey
             </p>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-1 gap-8">
             <div className="border rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-medium mb-4">Add New Travel Interest</h3>
               {user && <InterestForm locations={locations || []} userId={user.id} />}
             </div>
 
-            <div className="border rounded-lg p-6 shadow-sm">
+            {/* <div className="border rounded-lg p-6 shadow-sm">
               <h3 className="text-lg font-medium mb-4">Your Travel Interests</h3>
 
               {user && (
@@ -339,13 +339,13 @@ export default function HomePage() {
 
               <div className="mt-4">
                 <p className="text-gray-500 italic">
-                  Define criteria needed for new packages
+                  Define criteria needed for new tours 
                 </p>
                 <p className="text-gray-500 mt-2">
-                  → Click generate to create new packages that match your parameters
+                  → Click generate to create new tours that match your interests
                 </p>
               </div>
-            </div>
+            </div> */}
           </div>
         </div>
       </section>

@@ -296,7 +296,7 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Saving..." : "Save Interest"}
+        {isLoading ? "Saving..." : "Find & Generate Tour"}
       </Button>
     </form>
   );
