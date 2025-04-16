@@ -20,8 +20,20 @@ body {
     --card-foreground: 0 0% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 3.9%;
-    --primary: 0 0% 9%;
-    --primary-foreground: 0 0% 98%;
+    
+    /* Updated Color Palette */
+    --primary: 21 94% 50%; /* #fb5607 (orange) */
+    --primary-light: 21 97% 77%; /* #fdb18d */
+    --primary-lighter: 21 100% 95%; /* #ffeee6 */
+    --primary-dark: 21 94% 46%; /* #e44e06 */
+    --purple: 263 84% 57%; /* #8338ec */
+    --error: 0 87% 64%; /* #f44d4d */
+    --text-primary: 0 0% 20%; /* #333333 */
+    --text-secondary: 0 0% 20% 0.6; /* #333333 with opacity */
+    --white: 0 0% 100%; /* #ffffff */
+    --disabled-bg: 0 0% 20% 0.1; /* #333333 10% opacity */
+    
+    --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 96.1%;
     --secondary-foreground: 0 0% 9%;
     --muted: 0 0% 96.1%;
@@ -32,21 +44,21 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 89.8%;
     --input: 0 0% 89.8%;
-    --ring: 0 0% 3.9%;
+    --ring: 21 94% 50%; /* Match primary */
     --chart-1: 12 76% 61%;
     --chart-2: 173 58% 39%;
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
     --radius: 0.5rem;
-    --sidebar-background: 0 0% 98%;
-    --sidebar-foreground: 240 5.3% 26.1%;
-    --sidebar-primary: 240 5.9% 10%;
-    --sidebar-primary-foreground: 0 0% 98%;
-    --sidebar-accent: 240 4.8% 95.9%;
-    --sidebar-accent-foreground: 240 5.9% 10%;
-    --sidebar-border: 220 13% 91%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 21 100% 95%; /* primary-lighter */
+    --sidebar-foreground: 0 0% 20%; /* text-primary */
+    --sidebar-primary: 21 94% 50%; /* primary */
+    --sidebar-primary-foreground: 0 0% 100%; /* white */
+    --sidebar-accent: 263 84% 57%; /* purple */
+    --sidebar-accent-foreground: 0 0% 100%; /* white */
+    --sidebar-border: 21 97% 77%; /* primary-light */
+    --sidebar-ring: 21 94% 50%; /* primary */
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -55,8 +67,20 @@ body {
     --card-foreground: 0 0% 98%;
     --popover: 0 0% 3.9%;
     --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
+    
+    /* Updated Dark Mode Color Palette */
+    --primary: 21 94% 50%; /* #fb5607 (orange) - keeping the same */
+    --primary-light: 21 97% 77%; /* #fdb18d - keeping the same */
+    --primary-lighter: 21 60% 25%; /* Darker version of primary-lighter */
+    --primary-dark: 21 94% 46%; /* #e44e06 - keeping the same */
+    --purple: 263 84% 57%; /* #8338ec - keeping the same */
+    --error: 0 87% 64%; /* #f44d4d - keeping the same */
+    --text-primary: 0 0% 90%; /* Lighter version for dark mode */
+    --text-secondary: 0 0% 90% 0.6; /* With opacity */
+    --white: 0 0% 100%; /* #ffffff - keeping the same */
+    --disabled-bg: 0 0% 90% 0.1; /* Lighter version with opacity */
+    
+    --primary-foreground: 0 0% 100%;
     --secondary: 0 0% 14.9%;
     --secondary-foreground: 0 0% 98%;
     --muted: 0 0% 14.9%;
@@ -67,20 +91,20 @@ body {
     --destructive-foreground: 0 0% 98%;
     --border: 0 0% 14.9%;
     --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --ring: 21 94% 50%; /* Match primary */
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
-    --sidebar-background: 240 5.9% 10%;
-    --sidebar-foreground: 240 4.8% 95.9%;
-    --sidebar-primary: 224.3 76.3% 48%;
-    --sidebar-primary-foreground: 0 0% 100%;
-    --sidebar-accent: 240 3.7% 15.9%;
-    --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
-    --sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 21 30% 15%; /* Darker version of primary-lighter */
+    --sidebar-foreground: 0 0% 90%; /* text-primary */
+    --sidebar-primary: 21 94% 50%; /* primary */
+    --sidebar-primary-foreground: 0 0% 100%; /* white */
+    --sidebar-accent: 263 84% 57%; /* purple */
+    --sidebar-accent-foreground: 0 0% 100%; /* white */
+    --sidebar-border: 21 70% 25%; /* Darker version of primary-light */
+    --sidebar-ring: 21 94% 50%; /* primary */
   }
 }
 

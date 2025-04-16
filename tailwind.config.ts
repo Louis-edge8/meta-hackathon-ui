@@ -23,7 +23,10 @@ const config: Config = {
   			},
   			primary: {
   				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
+  				foreground: 'hsl(var(--primary-foreground))',
+                light: 'hsl(var(--primary-light))',
+                lighter: 'hsl(var(--primary-lighter))',
+                dark: 'hsl(var(--primary-dark))'
   			},
   			secondary: {
   				DEFAULT: 'hsl(var(--secondary))',
@@ -41,6 +44,16 @@ const config: Config = {
   				DEFAULT: 'hsl(var(--destructive))',
   				foreground: 'hsl(var(--destructive-foreground))'
   			},
+            error: 'hsl(var(--error))',
+            purple: 'hsl(var(--purple))',
+            text: {
+                primary: 'hsl(var(--text-primary))',
+                secondary: 'hsl(var(--text-secondary))'
+            },
+            white: 'hsl(var(--white))',
+            disabled: {
+                bg: 'hsl(var(--disabled-bg))'
+            },
   			border: 'hsl(var(--border))',
   			input: 'hsl(var(--input))',
   			ring: 'hsl(var(--ring))',

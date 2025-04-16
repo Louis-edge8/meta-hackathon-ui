@@ -6,7 +6,6 @@ import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
 import { Loader2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
-import { DashboardHeader } from "./dashboard-header"
 import { InterestForm } from "./interest-form"
 import { InterestsList } from "./interests-list"
 import { SearchResultsWrapper } from "./search-results-wrapper"
@@ -157,43 +156,40 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      {user && <DashboardHeader user={user} />}
-      <main className="flex-1 container mx-auto px-4 pb-8">
-        <div className="grid gap-8 border-2 border-gray-200 dark:border-gray-700">
-          <div className="grid grid-cols-12">
-            <div className="col-span-6 space-y-6 border-r-2 border-gray-200 dark:border-gray-700">
-              <div className="py-6 px-8">
-                <h2 className="text-xl font-semibold mb-4">Add New Travel Interest</h2>
-                {user && <InterestForm locations={locations || []} userId={user.id} />}
-              </div>
+    <main className="flex-1 container mx-auto px-4 pb-8">
+      <div className="grid gap-8 border-2 border-gray-200 dark:border-gray-700">
+        <div className="grid grid-cols-12">
+          <div className="col-span-6 space-y-6 border-r-2 border-gray-200 dark:border-gray-700">
+            <div className="py-6 px-8">
+              <h2 className="text-xl font-semibold mb-4">Add New Travel Interest</h2>
+              {user && <InterestForm locations={locations || []} userId={user.id} />}
             </div>
-            <div className="col-span-6 space-y-6">
-              <div className="py-6 px-8">
-                <h2 className="text-xl font-semibold mb-4">Your Travel Interests</h2>
-                {user && <InterestsList
-                  userId={user.id}
-                  initialInterests={interests}
-                  onSearch={handleSearch}
-                  searchingInterestId={interestId}
-                />}
-              </div>
+          </div>
+          <div className="col-span-6 space-y-6">
+            <div className="py-6 px-8">
+              <h2 className="text-xl font-semibold mb-4">Your Travel Interests</h2>
+              {user && <InterestsList
+                userId={user.id}
+                initialInterests={interests}
+                onSearch={handleSearch}
+                searchingInterestId={interestId}
+              />}
             </div>
+          </div>
 
-            <div className="col-span-12 border-t-2 border-gray-200 dark:border-gray-700 p-8">
-              <h2 className="text-xl font-semibold mb-4">Search Results</h2>
-              <div className="min-h-[200px]">
-                <SearchResultsWrapper
-                  results={searchResults}
-                  interest={interests.find(interest => interest.id === interestId)}
-                  interestLocations={interestLocations}
-                  currentInterestId={interestId}
-                />
-              </div>
+          <div className="col-span-12 border-t-2 border-gray-200 dark:border-gray-700 p-8">
+            <h2 className="text-xl font-semibold mb-4">Search Results</h2>
+            <div className="min-h-[200px]">
+              <SearchResultsWrapper
+                results={searchResults}
+                interest={interests.find(interest => interest.id === interestId)}
+                interestLocations={interestLocations}
+                currentInterestId={interestId}
+              />
             </div>
           </div>
         </div>
-      </main>
-    </div>
+      </div>
+    </main>
   )
 }
