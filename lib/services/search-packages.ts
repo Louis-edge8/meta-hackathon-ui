@@ -45,8 +45,8 @@ export async function searchPackages(params: SearchPackagesParams): Promise<Pack
         "accept-language": "vi,en-US;q=0.9,en;q=0.8",
         "cache-control": "no-cache",
         "pragma": "no-cache",
-        "origin": "https://hackathon-travel-buddy-pb.onrender.com",
-        "referer": "https://hackathon-travel-buddy-pb.onrender.com/docs"
+        "origin": "https://hackathon-travel-buddy-pb.fly.dev",
+        "referer": "https://hackathon-travel-buddy-pb.fly.dev/docs"
       },
       body: JSON.stringify(params),
     });

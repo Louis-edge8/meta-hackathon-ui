@@ -34,7 +34,7 @@ export default function LoginForm() {
       if (error) throw error
 
       router.refresh()
-      router.push("/dashboard")
+      router.push("/")
     } catch (error: any) {
       toast({
         title: "Authentication error",

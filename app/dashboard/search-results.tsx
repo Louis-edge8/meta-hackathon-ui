@@ -1,26 +1,35 @@
 "use client"
 
 import { PackageDetails } from "@/app/components/package-details"
+import TourPackagePreview from "@/app/components/tour-package-preview"
 import { Button } from "@/components/ui/button"
 import type { Package } from "@/lib/services/search-packages"
 import { UserInterest } from "@/lib/types"
 import { Facebook, Pencil, X } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import ReactMarkdown from "react-markdown"
 import MessengerInterface from "./messenger-chat"
 import WhatsAppTourismChat from "./whatsapp-chat"
 
 interface SearchResultsProps {
     results: Package[]
-    interest: UserInterest
-    interestLocations: Record<string, string>
+    interest?: UserInterest
+    interestLocations?: Record<string, string>
 }
 
-export function SearchResults({ results, interest, interestLocations }: SearchResultsProps) {
-    const [selectedPackage, setSelectedPackage] = useState<Package | null>(null)
-    const [cachedResults, setCachedResults] = useState<Package[]>([])
+// Add interface to extend Package with isAIGenerated flag
+interface ExtendedPackage extends Package {
+    isAIGenerated?: boolean;
+}
+
+export function SearchResults({ results }: SearchResultsProps) {
+    const [selectedPackage, setSelectedPackage] = useState<ExtendedPackage | null>(null)
+    const [cachedResults, setCachedResults] = useState<ExtendedPackage[]>([])
     const [showWhatsApp, setShowWhatsApp] = useState(false)
     const [showMessenger, setShowMessenger] = useState(false)
+    const [showMarketplacePreview, setShowMarketplacePreview] = useState(false)
+    const [previewPackage, setPreviewPackage] = useState<ExtendedPackage | null>(null)
     const router = useRouter()
 
     // Keep a cached copy of results that won't disappear
@@ -49,6 +58,12 @@ export function SearchResults({ results, interest, interestLocations }: SearchRe
         }
     };
 
+    // Function to handle marketplace preview
+    const handleMarketplacePreview = (pkg: ExtendedPackage) => {
+        setPreviewPackage(pkg);
+        setShowMarketplacePreview(true);
+    };
+
     return (
         <>
             <div className={`flex ${showWhatsApp || showMessenger ? 'space-x-4' : ''}`}>
@@ -68,17 +83,36 @@ export function SearchResults({ results, interest, interestLocations }: SearchRe
                                     <div className="absolute bottom-0 left-0 bg-orange-500 text-white px-3 py-1 rounded-tr-lg font-bold">
                                         ${pkg.price}
                                     </div>
+                                    {pkg.isAIGenerated && (
+                                        <div className="absolute top-0 right-0 bg-purple-600 text-white px-3 py-1 rounded-bl-lg font-bold flex items-center">
+                                            <svg className="h-4 w-4 mr-1" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M15.5 9L15.6716 9.17157C17.0049 10.5049 17.6716 11.1716 17.6716 12C17.6716 12.8284 17.0049 13.4951 15.6716 14.8284L15.5 15" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                                <path d="M13.5 7L13.6716 7.17157C16.0049 9.50491 17.1716 10.6716 17.1716 12C17.1716 13.3284 16.0049 14.4951 13.6716 16.8284L13.5 17" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                                <path d="M10.5 15L10.3284 14.8284C8.99509 13.4951 8.32843 12.8284 8.32843 12C8.32843 11.1716 8.99509 10.5049 10.3284 9.17157L10.5 9" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                                <path d="M8.5 17L8.32843 16.8284C5.99509 14.4951 4.82843 13.3284 4.82843 12C4.82843 10.6716 5.99509 9.50491 8.32843 7.17157L8.5 7" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+                                            </svg>
+                                            Created By AI
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="p-4 bg-white dark:bg-gray-800 flex-grow flex flex-col">
                                     <div className="flex justify-between items-center mb-2">
                                         <h4 className="font-medium text-lg">{pkg.title}</h4>
                                         <Pencil className="h-4 w-4 text-gray-400" />
                                     </div>
-                                    <p className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2 flex-grow">
-                                        {pkg.description}
-                                    </p>
+                                    <div className="text-sm text-gray-600 dark:text-gray-300 mb-4 line-clamp-2 flex-grow">
+                                        <ReactMarkdown>{pkg.description}</ReactMarkdown>
+                                    </div>
                                     <div className="space-y-3 mt-auto">
                                         <div className="flex gap-2">
+                                            <Button
+                                                variant="outline"
+                                                size="icon"
+                                                className="h-8 w-8"
+                                                onClick={() => console.log('Edit package', pkg.id)}
+                                            >
+                                                <Pencil className="h-3 w-3" />
+                                            </Button>
                                             <Button
                                                 variant="outline"
                                                 className="w-full h-8 text-sm px-3"
@@ -88,15 +122,12 @@ export function SearchResults({ results, interest, interestLocations }: SearchRe
                                             </Button>
                                         </div>
                                         <div className="flex gap-2">
-                                            <Button onClick={() => toggleChat('messenger')} className="flex-1 h-8 text-sm px-3 bg-[#1877F2] hover:bg-[#0e6ae3]">
+                                            <Button
+                                                className="flex-1 h-8 text-sm px-3 bg-[#1877F2] hover:bg-[#0e6ae3]"
+                                                onClick={() => handleMarketplacePreview(pkg)}
+                                            >
                                                 <Facebook className="h-3 w-3 mr-1" />
-                                                Facebook
-                                            </Button>
-                                            <Button onClick={() => toggleChat('whatsapp')} className="flex-1 h-8 text-sm px-3 bg-[#25D366] hover:bg-[#1ebd59]">
-                                                <svg className="h-3 w-3 mr-1" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                                </svg>
-                                                WhatsApp
+                                                Publish to Marketplace
                                             </Button>
                                         </div>
                                     </div>
@@ -139,26 +170,30 @@ export function SearchResults({ results, interest, interestLocations }: SearchRe
                 actions={
                     selectedPackage && (
                         <>
-                            <Button className="bg-[#1877F2] hover:bg-[#0e6ae3]" onClick={() => {
-                                setSelectedPackage(null);
-                                toggleChat('messenger');
-                            }}>
-                                <Facebook className="h-4 w-4 mr-2" />
-                                Facebook
+                            <Button variant="outline" onClick={() => setSelectedPackage(null)}>
+                                Details
                             </Button>
-                            <Button className="bg-[#25D366] hover:bg-[#1ebd59]" onClick={() => {
-                                setSelectedPackage(null);
-                                toggleChat('whatsapp');
-                            }}>
-                                <svg className="h-4 w-4 mr-2" viewBox="0 0 24 24" fill="white" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z" />
-                                </svg>
-                                WhatsApp
+                            <Button
+                                className="bg-[#1877F2] hover:bg-[#0e6ae3]"
+                                onClick={() => {
+                                    setSelectedPackage(null);
+                                    handleMarketplacePreview(selectedPackage);
+                                }}
+                            >
+                                <Facebook className="h-4 w-4 mr-2" />
+                                Publish to Facebook Marketplace
                             </Button>
                         </>
                     )
                 }
                 maxWidth="600px"
+            />
+
+            {/* Marketplace Preview Modal */}
+            <TourPackagePreview
+                isOpen={showMarketplacePreview}
+                onClose={() => setShowMarketplacePreview(false)}
+                package={previewPackage}
             />
         </>
     )

@@ -15,96 +15,96 @@ body {
 @layer base {
   :root {
     --background: 0 0% 100%;
-    --foreground: 0 0% 3.9%;
+    --foreground: 240 10% 3.9%;
     --card: 0 0% 100%;
-    --card-foreground: 0 0% 3.9%;
+    --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 3.9%;
+    --popover-foreground: 240 10% 3.9%;
     
-    /* Updated Color Palette */
-    --primary: 21 94% 50%; /* #fb5607 (orange) */
-    --primary-light: 21 97% 77%; /* #fdb18d */
-    --primary-lighter: 21 100% 95%; /* #ffeee6 */
-    --primary-dark: 21 94% 46%; /* #e44e06 */
-    --purple: 263 84% 57%; /* #8338ec */
-    --error: 0 87% 64%; /* #f44d4d */
-    --text-primary: 0 0% 20%; /* #333333 */
-    --text-secondary: 0 0% 20% 0.6; /* #333333 with opacity */
+    /* Improved Color Palette for Better Visibility */
+    --primary: 220 90% 56%; /* #1a6ee2 (blue) - better visibility */
+    --primary-light: 220 90% 76%; /* #6ea9fa */
+    --primary-lighter: 220 90% 95%; /* #e8f2ff */
+    --primary-dark: 220 90% 43%; /* #0b5ed7 */
+    --purple: 270 76% 53%; /* #7b42f6 - more visible purple */
+    --error: 0 84% 60%; /* #e94a4a */
+    --text-primary: 240 10% 10%; /* #191b21 - darker for better contrast */
+    --text-secondary: 240 5% 34%; /* #56585e - not using opacity for better visibility */
     --white: 0 0% 100%; /* #ffffff */
-    --disabled-bg: 0 0% 20% 0.1; /* #333333 10% opacity */
+    --disabled-bg: 220 15% 90%; /* #e1e5ef - solid color instead of opacity */
     
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 96.1%;
-    --secondary-foreground: 0 0% 9%;
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
-    --accent: 0 0% 96.1%;
-    --accent-foreground: 0 0% 9%;
-    --destructive: 0 84.2% 60.2%;
+    --secondary: 210 20% 96.1%; /* slightly blue tinted for better distinction */
+    --secondary-foreground: 240 10% 9%;
+    --muted: 210 20% 96.1%;
+    --muted-foreground: 240 5% 34%;
+    --accent: 210 30% 92%; /* slightly blue tinted for better distinction */
+    --accent-foreground: 240 10% 9%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 21 94% 50%; /* Match primary */
-    --chart-1: 12 76% 61%;
-    --chart-2: 173 58% 39%;
-    --chart-3: 197 37% 24%;
-    --chart-4: 43 74% 66%;
-    --chart-5: 27 87% 67%;
+    --border: 214 32% 84%;
+    --input: 214 32% 84%;
+    --ring: 220 90% 56%; /* Match primary */
+    --chart-1: 220 90% 56%; /* primary */
+    --chart-2: 160 70% 40%; /* #0d9474 - teal */
+    --chart-3: 30 90% 52%; /* #f59e0b - orange */
+    --chart-4: 270 76% 53%; /* purple */
+    --chart-5: 345 83% 56%; /* #e41f6f - magenta */
     --radius: 0.5rem;
-    --sidebar-background: 21 100% 95%; /* primary-lighter */
-    --sidebar-foreground: 0 0% 20%; /* text-primary */
-    --sidebar-primary: 21 94% 50%; /* primary */
+    --sidebar-background: 220 90% 95%; /* primary-lighter */
+    --sidebar-foreground: 240 10% 10%; /* text-primary */
+    --sidebar-primary: 220 90% 56%; /* primary */
     --sidebar-primary-foreground: 0 0% 100%; /* white */
-    --sidebar-accent: 263 84% 57%; /* purple */
+    --sidebar-accent: 270 76% 53%; /* purple */
     --sidebar-accent-foreground: 0 0% 100%; /* white */
-    --sidebar-border: 21 97% 77%; /* primary-light */
-    --sidebar-ring: 21 94% 50%; /* primary */
+    --sidebar-border: 220 90% 76%; /* primary-light */
+    --sidebar-ring: 220 90% 56%; /* primary */
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
+    --background: 240 10% 9%;  /* #16171c - better than pure black */
+    --foreground: 0 0% 96%;
+    --card: 240 10% 11%; /* slightly lighter than background */
+    --card-foreground: 0 0% 96%;
+    --popover: 240 10% 11%;
+    --popover-foreground: 0 0% 96%;
     
-    /* Updated Dark Mode Color Palette */
-    --primary: 21 94% 50%; /* #fb5607 (orange) - keeping the same */
-    --primary-light: 21 97% 77%; /* #fdb18d - keeping the same */
-    --primary-lighter: 21 60% 25%; /* Darker version of primary-lighter */
-    --primary-dark: 21 94% 46%; /* #e44e06 - keeping the same */
-    --purple: 263 84% 57%; /* #8338ec - keeping the same */
-    --error: 0 87% 64%; /* #f44d4d - keeping the same */
-    --text-primary: 0 0% 90%; /* Lighter version for dark mode */
-    --text-secondary: 0 0% 90% 0.6; /* With opacity */
-    --white: 0 0% 100%; /* #ffffff - keeping the same */
-    --disabled-bg: 0 0% 90% 0.1; /* Lighter version with opacity */
+    /* Improved Dark Mode Color Palette */
+    --primary: 217 91% 60%; /* #3b82f6 - brighter blue for dark mode */
+    --primary-light: 217 91% 72%; /* #74a8f8 */
+    --primary-lighter: 217 91% 24%; /* #1a3b72 - darker but still visible */
+    --primary-dark: 217 91% 51%; /* #2271f3 */
+    --purple: 265 83% 65%; /* #9760f6 - brighter purple for dark mode */
+    --error: 0 91% 65%; /* #f55b5b - brighter red for dark mode */
+    --text-primary: 0 0% 94%; /* very light gray */
+    --text-secondary: 225 5% 70%; /* #a9adb8 - solid color */
+    --white: 0 0% 100%; /* #ffffff */
+    --disabled-bg: 226 15% 24%; /* #353b4d - visible but not distracting */
     
     --primary-foreground: 0 0% 100%;
-    --secondary: 0 0% 14.9%;
+    --secondary: 240 6% 16%;
     --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
+    --muted: 240 6% 16%;
+    --muted-foreground: 225 5% 70%;
+    --accent: 240 6% 18%; /* slightly lighter than secondary */
     --accent-foreground: 0 0% 98%;
-    --destructive: 0 62.8% 30.6%;
+    --destructive: 0 75% 51%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 21 94% 50%; /* Match primary */
-    --chart-1: 220 70% 50%;
-    --chart-2: 160 60% 45%;
-    --chart-3: 30 80% 55%;
-    --chart-4: 280 65% 60%;
-    --chart-5: 340 75% 55%;
-    --sidebar-background: 21 30% 15%; /* Darker version of primary-lighter */
-    --sidebar-foreground: 0 0% 90%; /* text-primary */
-    --sidebar-primary: 21 94% 50%; /* primary */
+    --border: 240 6% 24%;
+    --input: 240 6% 24%;
+    --ring: 217 91% 60%; /* Match primary */
+    --chart-1: 217 91% 60%; /* primary */
+    --chart-2: 162 73% 52%; /* #21c998 - bright teal */
+    --chart-3: 35 92% 62%; /* #fab626 - bright orange */
+    --chart-4: 265 83% 65%; /* purple */
+    --chart-5: 350 83% 67%; /* #f26396 - bright pink */
+    --sidebar-background: 240 14% 14%; /* #202227 - dark but not pure black */
+    --sidebar-foreground: 0 0% 94%; /* text-primary */
+    --sidebar-primary: 217 91% 60%; /* primary */
     --sidebar-primary-foreground: 0 0% 100%; /* white */
-    --sidebar-accent: 263 84% 57%; /* purple */
+    --sidebar-accent: 265 83% 65%; /* purple */
     --sidebar-accent-foreground: 0 0% 100%; /* white */
-    --sidebar-border: 21 70% 25%; /* Darker version of primary-light */
-    --sidebar-ring: 21 94% 50%; /* primary */
+    --sidebar-border: 240 8% 26%; /* #3c3f4b - visible border */
+    --sidebar-ring: 217 91% 60%; /* primary */
   }
 }
 

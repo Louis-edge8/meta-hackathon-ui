@@ -3,7 +3,7 @@
 import { Button } from "@/components/ui/button"
 import { Package } from "@/lib/services/search-packages"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { ArrowRight, Heart, Loader2, Sparkles } from "lucide-react"
+import { ArrowRight, Edit, Facebook, Heart, Loader2, RefreshCw } from "lucide-react"
 import Image from "next/image"
 import { useEffect, useState } from "react"
 import { PackageDetails } from "../components/package-details"
@@ -15,49 +15,82 @@ interface TrendingPackage extends Package {
 
 export default function ProvidersPage() {
     const [trendingPackages, setTrendingPackages] = useState<TrendingPackage[]>([])
+    const [proposedPackages, setProposedPackages] = useState<Package[]>([])
     const [isLoading, setIsLoading] = useState(true)
+    const [isProposedLoading, setIsProposedLoading] = useState(true)
     const [selectedPackage, setSelectedPackage] = useState<TrendingPackage | null>(null)
     const supabase = createClientComponentClient()
 
     useEffect(() => {
-        async function fetchTrendingPackages() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession()
-
-                if (!session) {
-                    throw new Error("User not authenticated")
-                }
-
-                // This is a mock API endpoint - replace with your actual endpoint
-                const response = await fetch("/api/trending-packages", {
-                    method: "GET",
-                    headers: {
-                        "Content-Type": "application/json",
-                        "Authorization": `Bearer ${session.access_token}`
-                    }
-                })
-
-                if (!response.ok) {
-                    throw new Error("Failed to fetch trending packages")
-                }
-
-                const data = await response.json()
-                // Sort by interested_count (descending)
-                const packages = data.packages || data.data || data || []
-                const sortedPackages = [...packages].sort((a, b) =>
-                    (b.interested_count || 0) - (a.interested_count || 0)
-                ).slice(0, 10) // limit to top 10
-
-                setTrendingPackages(sortedPackages)
-            } catch (error) {
-                console.error("Error fetching trending packages:", error)
-            } finally {
-                setIsLoading(false)
-            }
-        }
-
         fetchTrendingPackages()
-    }, [supabase])
+        fetchProposedPackages()
+    }, [])
+
+    async function fetchTrendingPackages() {
+        try {
+            setIsLoading(true)
+            const { data: { session } } = await supabase.auth.getSession()
+
+            if (!session) {
+                throw new Error("User not authenticated")
+            }
+
+            const response = await fetch("/api/trending-packages", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session.access_token}`
+                }
+            })
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch trending packages")
+            }
+
+            const data = await response.json()
+            const packages = data.packages || data.data || data || []
+            setTrendingPackages(packages)
+        } catch (error) {
+            console.error("Error fetching trending packages:", error)
+        } finally {
+            setIsLoading(false)
+        }
+    }
+
+    async function fetchProposedPackages() {
+        try {
+            setIsProposedLoading(true)
+            const { data: { session } } = await supabase.auth.getSession()
+
+            if (!session) {
+                throw new Error("User not authenticated")
+            }
+
+            const response = await fetch("/api/proposed-packages", {
+                method: "GET",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${session.access_token}`
+                }
+            })
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch proposed packages")
+            }
+
+            const data = await response.json()
+            const packages = data.packages || data.data || data || []
+            setProposedPackages(packages)
+        } catch (error) {
+            console.error("Error fetching proposed packages:", error)
+        } finally {
+            setIsProposedLoading(false)
+        }
+    }
+
+    const handleRandomizeProposals = () => {
+        fetchProposedPackages()
+    }
 
     return (
         <main className="flex-1 container mx-auto px-4 pb-8">
@@ -81,7 +114,7 @@ export default function ProvidersPage() {
                             {trendingPackages.map((pkg, index) => (
                                 <div key={pkg.id} className="flex items-center border rounded-lg overflow-hidden hover:border-gray-400 transition-colors">
                                     {/* Ranking number */}
-                                    <div className="px-3 py-4 flex items-center">
+                                    <div className="px-3 py-4 flex items-center justify-center w-12">
                                         <span className="font-medium text-gray-700">{index + 1}</span>
                                     </div>
 
@@ -121,39 +154,66 @@ export default function ProvidersPage() {
 
                 {/* Packages proposal section */}
                 <div className="bg-white rounded-lg shadow-md p-6">
-                    <h2 className="text-xl font-semibold mb-4">Packages proposal</h2>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-                        {/* P1 */}
-                        <div className="border rounded-lg p-4">
-                            <div className="font-medium">P1</div>
-                            <div className="text-sm">Details</div>
-                        </div>
+                    <h2 className="text-xl font-semibold mb-4">My packages</h2>
 
-                        {/* P2 */}
-                        <div className="border rounded-lg p-4">
-                            <div className="font-medium">P2</div>
-                            <div className="text-sm">Details</div>
+                    {isProposedLoading ? (
+                        <div className="flex justify-center items-center py-8">
+                            <Loader2 className="h-6 w-6 animate-spin text-gray-400" />
                         </div>
+                    ) : proposedPackages.length === 0 ? (
+                        <div className="text-center py-6 text-gray-500 text-sm">
+                            No proposed packages available.
+                        </div>
+                    ) : (
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
+                            {proposedPackages.map((pkg) => (
+                                <div key={pkg.id} className="border rounded-lg p-4 relative">
+                                    {/* Package image */}
+                                    <div className="h-24 w-full relative mb-2 rounded overflow-hidden">
+                                        <Image
+                                            src={pkg.image_url || "https://placehold.co/600x400?text=No+Image"}
+                                            alt={pkg.title || "Package image"}
+                                            fill
+                                            className="object-cover"
+                                        />
+                                    </div>
 
-                        {/* P3 */}
-                        <div className="border rounded-lg p-4">
-                            <div className="font-medium">P3</div>
-                            <div className="text-sm">Details</div>
+                                    {/* Title */}
+                                    <div className="font-medium truncate">{pkg.title}</div>
+
+                                    {/* Price */}
+                                    <div className="text-sm">${pkg.price}</div>
+
+                                    {/* Edit button */}
+                                    <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="mt-2 w-full flex items-center justify-center gap-1"
+                                        onClick={() => setSelectedPackage(pkg as TrendingPackage)}
+                                    >
+                                        <Edit className="h-3.5 w-3.5" />
+                                        <span>Edit</span>
+                                    </Button>
+                                </div>
+                            ))}
                         </div>
-                    </div>
+                    )}
 
                     {/* Generate more button */}
                     <div className="flex justify-center">
-                        <button className="border rounded-lg px-4 py-2 flex items-center gap-2 hover:bg-gray-50">
-                            <span>Generate more</span>
-                        </button>
-                    </div>
-
-                    <div className="mt-6 text-gray-600">
-                        <p className="flex items-center gap-2">
-                            <Sparkles className="h-5 w-5" />
-                            Randomize (magic icon like AI) - add 3 - get data from packages table
-                        </p>
+                        <Button
+                            variant="outline"
+                            onClick={handleRandomizeProposals}
+                            disabled={isProposedLoading}
+                            className="flex items-center gap-2"
+                        >
+                            {isProposedLoading ? (
+                                <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                                <RefreshCw className="h-4 w-4" />
+                            )}
+                            <span>Randomize proposals</span>
+                        </Button>
                     </div>
                 </div>
             </div>
@@ -164,9 +224,15 @@ export default function ProvidersPage() {
                 onClose={() => setSelectedPackage(null)}
                 package={selectedPackage}
                 actions={
-                    <Button variant="outline" onClick={() => setSelectedPackage(null)}>
-                        Close
-                    </Button>
+                    <div className="flex gap-2">
+                        <Button variant="outline" onClick={() => setSelectedPackage(null)}>
+                            Details
+                        </Button>
+                        <Button className="bg-[#1877F2] hover:bg-[#0e6ae3]">
+                            <Facebook className="h-4 w-4 mr-2" />
+                            Publish to Facebook Marketplace
+                        </Button>
+                    </div>
                 }
             />
         </main>

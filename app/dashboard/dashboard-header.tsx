@@ -49,10 +49,10 @@ export function DashboardHeader({ user }: DashboardHeaderProps) {
           <div className="flex items-center space-x-3">
             <Link href="/dashboard" className="flex items-center">
               <Image
-                src="/travel-buddy-logo.svg"
+                src="/travel-buddy-logo.png"
                 alt="Travel Buddy"
-                width={40}
-                height={40}
+                width={48}
+                height={48}
                 className="rounded-md"
               />
               <span className="ml-2 text-xl font-bold">Travel Buddy</span>

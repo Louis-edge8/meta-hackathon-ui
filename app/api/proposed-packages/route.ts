@@ -1,12 +1,6 @@
-import { Package } from "@/lib/services/search-packages";
 import { createRouteHandlerClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-
-// Extended Package type with interested_count
-interface TrendingPackage extends Package {
-  interested_count: number;
-}
 
 export async function GET(request: Request) {
   try {
@@ -25,25 +19,26 @@ export async function GET(request: Request) {
       );
     }
 
-    // Fetch trending packages from the database, ordered by interested_count
-    const { data: trendingPackages, error } = await supabase
-      .from("travel_packages")
-      .select("*, interested_count")
-      .order("interested_count", { ascending: false })
-      .limit(10);
+    // Fetch random proposed travel packages from the database
+    // We're using a random order to randomize results
+    const { data: proposedPackages, error } = await supabase
+      .from("proposed_travel_packages")
+      .select("*")
+      .order("id", { ascending: false }) // Just to have some order
+      .limit(3); // Limiting to 3 proposed packages
 
     if (error) {
       throw error;
     }
 
     return NextResponse.json({
-      packages: trendingPackages
+      packages: proposedPackages
     });
     
   } catch (error: any) {
-    console.error("Error fetching trending packages:", error);
+    console.error("Error fetching proposed packages:", error);
     return NextResponse.json(
-      { error: error.message || "Failed to fetch trending packages" },
+      { error: error.message || "Failed to fetch proposed packages" },
       { status: 500 }
     );
   }
