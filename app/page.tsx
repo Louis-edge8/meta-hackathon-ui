@@ -1,12 +1,15 @@
 "use client"
 
+import TourPackageEditor from "@/app/components/tour-package-editor"
+import { Button } from "@/components/ui/button"
 import type { Location } from "@/lib/database.types"
 import { Package } from "@/lib/services/search-packages"
 import type { User } from "@supabase/auth-helpers-nextjs"
 import { createClientComponentClient } from "@supabase/auth-helpers-nextjs"
-import { Loader2 } from "lucide-react"
+import { Loader2, Plus, Wand2 } from "lucide-react"
 import { useRouter } from "next/navigation"
 import { useEffect, useState } from "react"
+import { toast } from "sonner"
 import { DashboardHeader } from "./dashboard/dashboard-header"
 import { InterestForm } from "./dashboard/interest-form"
 import { InterestsList } from "./dashboard/interests-list"
@@ -27,6 +30,9 @@ export default function HomePage() {
   const [packages, setPackages] = useState<Package[]>([])
   const [isPackagesLoading, setIsPackagesLoading] = useState(false)
   const [basePackages, setBasePackages] = useState<Package[]>([])
+  const [isEditorOpen, setIsEditorOpen] = useState(false)
+  const [selectedPackage, setSelectedPackage] = useState<Package | undefined>(undefined)
+  const [editorMode, setEditorMode] = useState<'add' | 'edit'>('add')
 
   // Fetch random packages from the database
   const fetchRandomPackages = async () => {
@@ -56,7 +62,7 @@ export default function HomePage() {
 
       // Shuffle the packages and return a random subset
       const shuffled = [...packages].sort(() => 0.5 - Math.random())
-      const randomPackages = shuffled.slice(0, Math.min(5, shuffled.length))
+      const randomPackages = shuffled.slice(0, Math.min(20, shuffled.length))
 
       setBasePackages(randomPackages || [])
     } catch (error) {
@@ -158,16 +164,20 @@ export default function HomePage() {
         headers: {
           "Content-Type": "application/json",
           "accept": "application/json",
+          "Authorization": `Bearer ${session.access_token}`,
           "cache-control": "no-cache",
           "pragma": "no-cache"
         },
         body: JSON.stringify({
-
-          location_input: interest.locations_text,
-          budget_input: interest.budget,
-          accommodation_input: interest.accommodation,
-          num_participants: 1,
-          activity_input: interest.activity,
+          location_input: interest.locations_text || "",
+          budget_input: "mid-range",  // Default to mid-range if not specified
+          accommodation_input: interest.accommodation || "standard",
+          activities_input: interest.activity || "",
+          num_participants: parseInt(interest.num_participants) || 1,
+          preferred_activities: interest.activity || "",
+          accommodation_preference: interest.accommodation || "standard",
+          budget_range: interest.budget || "$500-$1000",
+          duration_adjustment: "around 5 days",  // Default value
           match_count: 3
         }),
       });
@@ -265,6 +275,45 @@ export default function HomePage() {
     };
   }, []);
 
+  useEffect(() => {
+    const handleSearchEvent = (event: CustomEvent) => {
+      const { interest } = event.detail;
+      if (interest) {
+        handleSearch(interest);
+      }
+    };
+
+    window.addEventListener('search-interest', handleSearchEvent as EventListener);
+
+    return () => {
+      window.removeEventListener('search-interest', handleSearchEvent as EventListener);
+    };
+  }, []);
+
+  const handleEditPackage = (pkg: Package) => {
+    setSelectedPackage(pkg)
+    setEditorMode('edit')
+    setIsEditorOpen(true)
+  }
+
+  const handleDeletePackage = async (packageId: string) => {
+    try {
+      const { error } = await supabase
+        .from('travel_packages')
+        .delete()
+        .eq('id', packageId)
+
+      if (error) throw error
+
+      // Refresh packages list
+      fetchRandomPackages()
+      toast.success("Package deleted successfully")
+    } catch (error) {
+      console.error('Error deleting package:', error)
+      toast.error("Failed to delete package")
+    }
+  }
+
   if (isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center">
@@ -282,11 +331,22 @@ export default function HomePage() {
         <div className="flex-1 container mx-auto p-6">
           <div className="text-center mb-10">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent py-2">
-              My Travel Packages
+              My Travel Tours
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Discover your curated collection of travel experiences
+              Manage or publish your travel tours. You can add, edit, or delete your tours.
             </p>
+            <Button
+              className="mt-4 bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={() => {
+                setEditorMode('add')
+                setSelectedPackage(undefined)
+                setIsEditorOpen(true)
+              }}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Tour Package
+            </Button>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 overflow-x-auto pb-4">
@@ -295,10 +355,12 @@ export default function HomePage() {
                 <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
               </div>
             ) : (
-              <div className="col-span-12   border-gray-200 dark:border-gray-700 ">
+              <div className="col-span-12 border-gray-200 dark:border-gray-700">
                 <div className="min-h-[200px]">
                   <SearchResults
                     results={basePackages}
+                    onEdit={handleEditPackage}
+                    onDelete={handleDeletePackage}
                   />
                 </div>
               </div>
@@ -310,23 +372,31 @@ export default function HomePage() {
       {/* Section 2: Interest Form */}
       <section id="section-2" className="min-h-screen flex flex-col snap-start">
         <div className="container mx-auto p-6 flex-1">
-          <div className="text-center mb-10">
+          <div className="text-center mb-4">
             <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-teal-600 bg-clip-text text-transparent py-2">
-              Travel Interests & Criteria
+              Travel Tour Discovery
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              Define your travel preferences to find your perfect journey
+              Filter, find, or generate new travel tours using AI <Wand2 className="w-4 h-4 inline-block ml-1" />
             </p>
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             <div className="border rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-medium mb-4">Add New Travel Interest</h3>
+              <h3 className="text-lg font-medium mb-4">Find tour by Interest</h3>
               {user && <InterestForm locations={locations || []} userId={user.id} />}
+              <div className="mt-4">
+                <p className="text-gray-500 italic">
+                  Define criteria needed for new tours
+                </p>
+                <p className="text-gray-500 mt-2">
+                  → Click generate to create new tours that match your parameters
+                </p>
+              </div>
             </div>
 
             <div className="border rounded-lg p-6 shadow-sm">
-              <h3 className="text-lg font-medium mb-4">Your Travel Interests</h3>
+              <h3 className="text-lg font-medium mb-4">Recent Travel Interests</h3>
 
               {user && (
                 <InterestsList
@@ -337,14 +407,6 @@ export default function HomePage() {
                 />
               )}
 
-              <div className="mt-4">
-                <p className="text-gray-500 italic">
-                  Define criteria needed for new packages
-                </p>
-                <p className="text-gray-500 mt-2">
-                  → Click generate to create new packages that match your parameters
-                </p>
-              </div>
             </div>
           </div>
         </div>
@@ -398,6 +460,14 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      <TourPackageEditor
+        isOpen={isEditorOpen}
+        onClose={() => setIsEditorOpen(false)}
+        mode={editorMode}
+        initialData={selectedPackage}
+        locations={locations}
+        onSuccess={fetchRandomPackages}
+      />
     </main>
   )
 }

@@ -106,18 +106,20 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
         ...customLocations
       ].join(" | ");
 
+      const interestData = {
+        ...formData,
+        locations_id,
+        locations_text,
+        user_id: userId,
+      };
+
       // Use the server API route to handle the insert with admin privileges
       const response = await fetch("/api/interests", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          ...formData,
-          locations_id,
-          locations_text,
-          user_id: userId,
-        }),
+        body: JSON.stringify(interestData),
       });
 
       const result = await response.json();
@@ -145,6 +147,19 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
 
       // Refresh the page to show the new interest
       router.refresh();
+
+      // Trigger search with the new interest data
+      const searchEvent = new CustomEvent('search-interest', {
+        detail: { interest: { ...interestData, id: result.id } }
+      });
+      window.dispatchEvent(searchEvent);
+
+      // Scroll to results section
+      const resultsSection = document.getElementById('section-3');
+      if (resultsSection) {
+        resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+
     } catch (error: any) {
       console.error("Error saving interest:", error);
       toast({
@@ -288,7 +303,7 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
             name="notes"
             value={formData.notes || ""}
             onChange={handleChange}
-            placeholder="Any additional notes about your interest"
+            placeholder="Any additional notes about your new tour"
             rows={3}
             className="w-full"
           />
@@ -296,7 +311,7 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
       </div>
 
       <Button type="submit" className="w-full" disabled={isLoading}>
-        {isLoading ? "Saving..." : "Save Interest"}
+        {isLoading ? "Saving..." : "Find and generate tour"}
       </Button>
     </form>
   );

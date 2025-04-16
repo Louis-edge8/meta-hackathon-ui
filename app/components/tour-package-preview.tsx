@@ -1,6 +1,6 @@
 import MessengerInterface from "@/app/dashboard/messenger-chat"
 import WhatsAppTourismChat from "@/app/dashboard/whatsapp-chat"
-import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert"
+import { Alert } from "@/components/ui/alert"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -29,6 +29,18 @@ interface ExtendedPackage extends Package {
     trip_type?: string;
     ideal_for?: string[];
     best_season?: string;
+    // New API fields
+    location_input?: string;
+    budget_input?: string;
+    accommodation_input?: string;
+    activities_input?: string;
+    num_participants?: number;
+    preferred_activities?: string;
+    accommodation_preference?: string;
+    budget_range?: string;
+    duration_adjustment?: string;
+    match_count?: number;
+    provider_name?: string;
 }
 
 interface TourPackagePreviewProps {
@@ -57,13 +69,88 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
         setShowChat(showChat === chatType ? null : chatType);
     };
 
+    // Helper functions to extract data from API format
+    const getLocationDisplay = () => {
+        return pkg?.location_id || pkg?.location_input || "Destination";
+    };
+
+    const getPriceDisplay = () => {
+        if (pkg?.price) return pkg.price.toLocaleString();
+        if (pkg?.budget_range) {
+            // Extract numeric value from budget range
+            const match = pkg.budget_range.match(/\$(\d+)-\$(\d+)/);
+            if (match) {
+                const min = parseInt(match[1]);
+                const max = parseInt(match[2]);
+                return Math.floor((min + max) / 2).toLocaleString();
+            }
+        }
+        return pkg?.budget_input === "luxury" ? "2,000" :
+            pkg?.budget_input === "mid-range" ? "1,200" : "800";
+    };
+
+    const getDurationDays = () => {
+        if (pkg?.duration_days) return pkg.duration_days;
+        if (pkg?.duration_adjustment) {
+            const match = pkg.duration_adjustment.match(/(\d+)/);
+            if (match) return parseInt(match[0]);
+        }
+        return 7; // Default to 7 days
+    };
+
+    const getActivitiesList = () => {
+        const activities: string[] = [];
+        if (pkg?.highlights && pkg.highlights.length > 0) {
+            return pkg.highlights;
+        }
+
+        if (pkg?.activities_input) {
+            activities.push(...pkg.activities_input.split(',').map(a => a.trim()));
+        }
+
+        if (pkg?.preferred_activities) {
+            const preferred = pkg.preferred_activities.split(',').map(a => a.trim());
+            // Add only unique activities
+            preferred.forEach(p => {
+                if (!activities.includes(p)) activities.push(p);
+            });
+        }
+
+        return activities.length > 0 ? activities : [];
+    };
+
+    const getAccommodationType = () => {
+        return pkg?.trip_type || pkg?.accommodation_preference || pkg?.accommodation_input || "Hotel";
+    };
+
+    const getPackageTitle = () => {
+        return pkg?.title ||
+            `${getLocationDisplay()} ${getDurationDays()}-Day ${getAccommodationType()} Experience`;
+    };
+
+    const getIdealFor = () => {
+        let idealFor = pkg?.ideal_for || [];
+
+        if (!idealFor.length && pkg?.num_participants) {
+            if (pkg.num_participants === 2) {
+                idealFor = ["Couples", "Friends"];
+            } else if (pkg.num_participants > 2) {
+                idealFor = ["Families", "Groups"];
+            } else {
+                idealFor = ["Solo travelers", "Couples"];
+            }
+        }
+
+        return idealFor;
+    };
+
     return (
         <Dialog open={isOpen} onOpenChange={onClose}>
-            <DialogContent className="max-w-4xl p-0 h-[90vh] max-h-[90vh] flex flex-col overflow-hidden">
+            <DialogContent className="max-w-4xl p-0 h-[95vh] max-h-[95vh] flex flex-col overflow-hidden">
                 <div className="flex flex-col h-full overflow-hidden">
                     {/* Header */}
                     <header className="sticky top-0 z-10 bg-white border-b">
-                        <div className="flex items-center p-4">
+                        <div className="flex items-center p-2">
                             <Button variant="ghost" size="icon" className="mr-2" onClick={onClose}>
                                 <ArrowLeft className="w-5 h-5" />
                                 <span className="sr-only">Back</span>
@@ -73,13 +160,13 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                     </header>
 
                     {/* Preview Banner */}
-                    <div className="bg-blue-50 p-4 border-b border-blue-200">
-                        <Alert className="bg-white border-blue-200">
-                            <Info className="h-4 w-4 text-blue-600" />
-                            <AlertTitle className="text-blue-600">Preview Mode</AlertTitle>
-                            <AlertDescription>
-                                This is how your tour package will appear on Marketplace. Review all details before submitting.
-                            </AlertDescription>
+                    <div className="bg-blue-50 px-2 py-3 border-b border-blue-200">
+                        <Alert className="bg-white border-blue-200 py-2 flex items-center">
+                            <div className="flex items-center justify-center mr-2">
+                                <Info className="h-4 w-4 text-blue-600 flex-shrink-0" />
+                            </div>
+                            <span className="text-blue-600 font-medium mr-1">Preview Mode:</span>
+                            <span className="text-sm">This is how your tour package will appear on Facebook Marketplace. Review all details before submitting.</span>
                         </Alert>
                     </div>
 
@@ -96,8 +183,8 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                                 <div className="relative">
                                     <div className="aspect-[16/9] overflow-hidden">
                                         <img
-                                            src={pkg?.image_url || "/placeholder.svg?height=400&width=800"}
-                                            alt={pkg?.title || "Tour package"}
+                                            src={pkg?.image_url || `https://source.unsplash.com/random/800x450/?${getLocationDisplay().toLowerCase()},travel`}
+                                            alt={getPackageTitle()}
                                             className="object-cover w-full h-full"
                                         />
                                     </div>
@@ -115,15 +202,15 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                                 <div className="p-4 bg-white">
                                     <div className="flex justify-between items-start">
                                         <div>
-                                            <Badge className="mb-2 bg-green-100 text-green-800 hover:bg-green-100 border-0">Tour Package</Badge>
-                                            <h1 className="text-2xl font-bold">{pkg?.title || "Tour Package"}</h1>
+                                            <Badge className="mb-1 bg-green-100 text-green-800 hover:bg-green-100 border-0">Tour Package</Badge>
+                                            <h1 className="text-xl font-bold leading-tight">{getPackageTitle()}</h1>
                                             <div className="flex items-center mt-1 text-sm text-muted-foreground">
                                                 <MapPin className="h-4 w-4 mr-1" />
-                                                <span>{pkg?.location_id || "Destination"}</span>
+                                                <span>{getLocationDisplay()}</span>
                                             </div>
                                         </div>
                                         <div className="text-right">
-                                            <div className="text-2xl font-bold">${pkg?.price.toLocaleString() || "0"}</div>
+                                            <div className="text-2xl font-bold">${getPriceDisplay()}</div>
                                             <div className="text-sm text-muted-foreground">per person</div>
                                         </div>
                                     </div>
@@ -143,21 +230,19 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                                                 <Calendar className="h-5 w-5 mr-3 text-blue-600" />
                                                 <div>
                                                     <div className="text-sm font-medium">Duration</div>
-                                                    <div className="text-sm text-muted-foreground">{pkg?.duration_days || 0} days</div>
+                                                    <div className="text-sm text-muted-foreground">{getDurationDays()} days</div>
                                                 </div>
                                             </CardContent>
                                         </Card>
-                                        {pkg?.trip_type && (
-                                            <Card>
-                                                <CardContent className="p-3 flex items-center">
-                                                    <Users className="h-5 w-5 mr-3 text-blue-600" />
-                                                    <div>
-                                                        <div className="text-sm font-medium">Trip Type</div>
-                                                        <div className="text-sm text-muted-foreground">{pkg.trip_type}</div>
-                                                    </div>
-                                                </CardContent>
-                                            </Card>
-                                        )}
+                                        <Card>
+                                            <CardContent className="p-3 flex items-center">
+                                                <Users className="h-5 w-5 mr-3 text-blue-600" />
+                                                <div>
+                                                    <div className="text-sm font-medium">Accommodation</div>
+                                                    <div className="text-sm text-muted-foreground">{getAccommodationType()}</div>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
                                         {pkg?.best_season && (
                                             <Card>
                                                 <CardContent className="p-3 flex items-center">
@@ -169,32 +254,33 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                                                 </CardContent>
                                             </Card>
                                         )}
-                                        {pkg?.ideal_for && pkg.ideal_for.length > 0 && (
+                                        {getIdealFor().length > 0 && (
                                             <Card>
                                                 <CardContent className="p-3 flex items-center">
                                                     <Globe className="h-5 w-5 mr-3 text-blue-600" />
                                                     <div>
                                                         <div className="text-sm font-medium">Ideal For</div>
-                                                        <div className="text-sm text-muted-foreground">{pkg.ideal_for.join(', ')}</div>
+                                                        <div className="text-sm text-muted-foreground">{getIdealFor().join(', ')}</div>
                                                     </div>
                                                 </CardContent>
                                             </Card>
                                         )}
                                     </div>
 
-                                    <Separator className="my-6" />
+                                    <Separator className="my-3" />
 
                                     {/* Description Section */}
                                     <div className="mt-4">
-                                        <h3 className="text-lg font-semibold mb-3">Overview</h3>
+                                        <h3 className="text-lg font-semibold mb-2">Overview</h3>
                                         <div className="text-sm space-y-4">
                                             {pkg?.description ? (
                                                 <ReactMarkdown>{pkg.description}</ReactMarkdown>
                                             ) : (
                                                 <>
                                                     <p>
-                                                        Experience the magic of this tour. This carefully crafted journey takes you
-                                                        through the most breathtaking locations.
+                                                        Experience the beauty of {getLocationDisplay()} with our {getDurationDays()}-day
+                                                        {getAccommodationType() === 'luxury' ? ' luxury' : ''} tour package.
+                                                        Enjoy {getActivitiesList().slice(0, 3).join(', ')} and more during your stay.
                                                     </p>
                                                     <p>
                                                         Our experienced local guides will ensure you discover both famous landmarks and hidden gems while
@@ -206,78 +292,60 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                                     </div>
 
                                     {/* Itinerary Section - Conditionally displayed */}
-                                    {(pkg?.itinerary && pkg.itinerary.length > 0) || pkg?.duration_days ? (
+                                    {pkg?.itinerary && pkg.itinerary.length > 0 && (
                                         <>
-                                            <Separator className="my-6" />
+                                            <Separator className="my-3" />
                                             <div className="mt-4">
-                                                <h3 className="text-lg font-semibold mb-3">Itinerary</h3>
+                                                <h3 className="text-lg font-semibold mb-2">Itinerary</h3>
                                                 <div className="text-sm space-y-4">
-                                                    {pkg?.itinerary && pkg.itinerary.length > 0 ? (
-                                                        pkg.itinerary.map((day, idx) => (
-                                                            <div key={idx}>
-                                                                <h3 className="font-semibold">Day {day.day}: {day.title}</h3>
-                                                                <div className="space-y-2 mt-2">
-                                                                    {day.schedule.map((item, schedIdx) => (
-                                                                        <div key={schedIdx}>
-                                                                            <p><span className="text-blue-600 font-medium">{item.time}</span> – {item.description}</p>
-                                                                            {item.details && (
-                                                                                <p className="text-xs text-gray-500 mt-1">{item.details}</p>
-                                                                            )}
-                                                                        </div>
-                                                                    ))}
-                                                                </div>
+                                                    {pkg.itinerary.map((day, idx) => (
+                                                        <div key={idx}>
+                                                            <h3 className="font-semibold">Day {day.day}: {day.title}</h3>
+                                                            <div className="space-y-2 mt-2">
+                                                                {day.schedule.map((item, schedIdx) => (
+                                                                    <div key={schedIdx}>
+                                                                        <p><span className="text-blue-600 font-medium">{item.time}</span> – {item.description}</p>
+                                                                        {item.details && (
+                                                                            <p className="text-xs text-gray-500 mt-1">{item.details}</p>
+                                                                        )}
+                                                                    </div>
+                                                                ))}
                                                             </div>
-                                                        ))
-                                                    ) : (
-                                                        <>
-                                                            <div>
-                                                                <h3 className="font-semibold">Day 1: Arrival & Welcome</h3>
-                                                                <p>Arrive at your destination and get settled in your accommodation.</p>
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="font-semibold">Day 2-{pkg?.duration_days ? pkg.duration_days - 1 : '?'}: Exploration</h3>
-                                                                <p>Enjoy guided tours and activities throughout your stay.</p>
-                                                            </div>
-                                                            <div>
-                                                                <h3 className="font-semibold">Final Day: Departure</h3>
-                                                                <p>Check-out and transfer to departure point.</p>
-                                                            </div>
-                                                        </>
-                                                    )}
-                                                </div>
-                                            </div>
-                                        </>
-                                    ) : null}
-
-                                    {/* Includes Section - Conditionally displayed */}
-                                    {pkg?.highlights && pkg.highlights.length > 0 ? (
-                                        <>
-                                            <Separator className="my-6" />
-                                            <div className="mt-4">
-                                                <h3 className="text-lg font-semibold mb-3">What's Included</h3>
-                                                <div className="text-sm space-y-2">
-                                                    {pkg.highlights.map((highlight, idx) => (
-                                                        <p key={idx}>✓ {highlight}</p>
+                                                        </div>
                                                     ))}
-                                                    <p className="text-muted-foreground">✗ Personal expenses</p>
-                                                    <p className="text-muted-foreground">✗ Optional activities</p>
                                                 </div>
                                             </div>
                                         </>
-                                    ) : null}
+                                    )}
 
-                                    <Separator className="my-6" />
+                                    {/* Includes Section */}
+                                    <Separator className="my-3" />
+                                    <div className="mt-4">
+                                        <h3 className="text-lg font-semibold mb-2">Extended Services</h3>
+                                        <div className="text-sm space-y-2">
+                                            {getActivitiesList().map((activity, idx) => (
+                                                <p key={idx}>✓ {activity}</p>
+                                            ))}
+                                            <p>✓ {getDurationDays() - 1} nights accommodation ({getAccommodationType()})</p>
+                                            <p>✓ Transportation during tour</p>
+                                            <p>✓ Professional guide</p>
+                                            <p className="text-muted-foreground">✗ Personal expenses</p>
+                                            <p className="text-muted-foreground">✗ Optional activities</p>
+                                        </div>
+                                    </div>
+
+                                    <Separator className="my-3" />
 
                                     {/* Seller Info */}
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center">
                                             <Avatar className="h-12 w-12 mr-3 border">
                                                 <AvatarImage src="/placeholder.svg?height=48&width=48" alt="Seller" />
-                                                <AvatarFallback>{pkg?.provider_id?.substring(0, 2) || "TP"}</AvatarFallback>
+                                                <AvatarFallback>{pkg?.provider_name?.substring(0, 2) || pkg?.provider_id?.substring(0, 2) || "TP"}</AvatarFallback>
                                             </Avatar>
                                             <div>
-                                                <h3 className="font-semibold">Tour Provider</h3>
-                                                <p className="text-sm text-muted-foreground">ID: {pkg?.provider_id || "Unknown"}</p>
+                                                <h3 className="font-semibold">{pkg?.provider_name || pkg?.provider_id || "Premium Travel"}</h3>
+                                                <p className="text-sm text-muted-foreground">Licensed Tour Provider</p>
                                             </div>
                                         </div>
                                         <div className="flex gap-2">
@@ -325,8 +393,8 @@ export default function TourPackagePreview({ isOpen, onClose, package: pkg }: To
                     </div>
 
                     {/* Submit Actions */}
-                    <div className="sticky bottom-0 z-10 bg-white border-t p-4">
-                        <div className="max-w-3xl mx-auto flex gap-3">
+                    <div className="sticky bottom-0 z-10 bg-white border-t p-2">
+                        <div className="max-w-3xl mx-auto flex gap-2">
                             <Button variant="outline" className="flex-1" onClick={onClose}>
                                 Edit Package
                             </Button>
