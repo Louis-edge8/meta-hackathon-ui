@@ -193,7 +193,7 @@ export function InterestsList({ userId, initialInterests, onSearch, searchingInt
 
   return (
     <>
-      <div className="space-y-4 h-[500px] overflow-y-auto pr-2">
+      <div className="space-y-4 h-[500px] overflow-y-auto overscroll-contain pr-2">
         <div className="space-y-4">
           {interests.map((interest) => (
             <div
