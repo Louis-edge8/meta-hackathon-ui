@@ -187,7 +187,7 @@ export function SearchResults({ results, interest, interestLocations, onEdit, on
                 <div className={`${showWhatsApp || showMessenger ? 'w-2/3' : 'w-full'} flex flex-col space-y-6`}>
                     {/* Random Tours Section */}
                     <div>
-                        <h3 className="text-lg font-semibold mb-4">Random Tours</h3>
+                        <h3 className="text-lg font-semibold mb-4">My Tours</h3>
                         <div className="flex flex-row flex-nowrap gap-6 overflow-x-auto pb-4 snap-x">
                             {baseTours.length > 0 ? (
                                 baseTours.map(renderPackage)

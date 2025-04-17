@@ -1,36 +1,18 @@
 import { createServerComponentClient } from "@supabase/auth-helpers-nextjs";
 import { cookies } from "next/headers";
+import { Package } from "./search-packages";
 
-export interface SearchPackagesParams {
-  location_input: string;
-  budget_input: string;
-  accommodation_input: string;
-  activities_input: string;
-  num_participants: number;
-  preferred_activities: string;
-  accommodation_preference: string;
-  budget_range: string;
-  duration_adjustment: string;
-  match_count: number;
-  num_suggestions: number;
-}
-
-export interface Package {
-  id: string;
-  title: string;
-  provider_id: string;
+export interface SuggestTourParams {
   location_id: string;
-  price: number;
-  duration_days: number;
-  highlights: string[];
-  description: string;
-  image_url: string;
-  location_vector?: any; // Optional vector type
-  duration_vector?: any; // Optional vector type
-  isAIGenerated?: boolean; // Added to support AI-generated flag
+  user_preferences?: {
+    budget_range?: string;
+    duration_preference?: string;
+    activity_types?: string[];
+  };
+  num_suggestions?: number;
 }
 
-export async function searchPackages(params: SearchPackagesParams): Promise<Package[]> {
+export async function suggestTour(params: SuggestTourParams): Promise<Package[]> {
   const cookieStore = cookies();
   const supabase = createServerComponentClient({ cookies: () => cookieStore });
 
@@ -41,14 +23,15 @@ export async function searchPackages(params: SearchPackagesParams): Promise<Pack
     throw new Error("User not authenticated");
   }
 
-  const API_URL = "https://hackathon-travel-buddy-pb.fly.dev/search-travel-packages";
+  const API_URL = "https://hackathon-travel-buddy-pb.fly.dev/suggest-tour";
 
   try {
     const URL = `${API_URL}?authorization=${encodeURIComponent(`Bearer ${session.access_token}`)}`;
-    console.log('Sending search request:', {
+    console.log('Sending tour suggestion request:', {
       url: URL,
       params: params
     });
+
     const response = await fetch(URL, {
       method: "POST",
       headers: {
@@ -66,7 +49,7 @@ export async function searchPackages(params: SearchPackagesParams): Promise<Pack
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error('Search packages error:', {
+      console.error('Tour suggestion error:', {
         status: response.status,
         statusText: response.statusText,
         error: errorText
@@ -74,17 +57,17 @@ export async function searchPackages(params: SearchPackagesParams): Promise<Pack
       
       try {
         const errorJson = JSON.parse(errorText);
-        throw new Error(errorJson.error || errorJson.detail || "Failed to search packages");
+        throw new Error(errorJson.error || errorJson.detail || "Failed to get tour suggestions");
       } catch (e) {
-        throw new Error(`Failed to search packages: ${response.status} ${errorText}`);
+        throw new Error(`Failed to get tour suggestions: ${response.status} ${errorText}`);
       }
     }
 
     const data = await response.json();
-    console.log('Search response:', data);
-    return data.packages || data.data || data || [];
+    console.log('Suggestion response:', data);
+    return data.packages || data.suggestions || data || [];
   } catch (error: any) {
-    console.error('Search packages error:', error);
+    console.error('Tour suggestion error:', error);
     throw error;
   }
 } 

@@ -1,4 +1,4 @@
-import { searchPackages } from "@/lib/services/search-packages";
+import { suggestTour } from "@/lib/services/suggest-tour";
 import { NextResponse } from "next/server";
 
 export async function POST(request: Request) {
@@ -14,15 +14,15 @@ export async function POST(request: Request) {
     }
 
     // Log the request details
-    console.log("Search packages request:", {
+    console.log("Tour suggestion request:", {
       body,
       token: token.substring(0, 10) + '...' // Log only the start of the token for security
     });
 
-    const packages = await searchPackages(body);
+    const packages = await suggestTour(body);
 
     // Log the response
-    console.log("Search packages response:", {
+    console.log("Tour suggestion response:", {
       packagesCount: packages.length,
       firstPackage: packages[0] ? { 
         id: packages[0].id,
@@ -33,12 +33,12 @@ export async function POST(request: Request) {
     // Return packages in the expected format
     return NextResponse.json({ packages });
   } catch (error: any) {
-    console.error("Error searching packages:", {
+    console.error("Error getting tour suggestions:", {
       error: error.message,
       stack: error.stack
     });
     return NextResponse.json(
-      { error: error.message || "Failed to search packages" },
+      { error: error.message || "Failed to get tour suggestions" },
       { status: 500 }
     );
   }

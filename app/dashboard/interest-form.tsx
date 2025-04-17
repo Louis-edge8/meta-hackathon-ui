@@ -102,7 +102,7 @@ export function InterestForm({ locations, userId }: InterestFormProps) {
       // Prepare the locations data
       const locations_id = selectedLocations.map((loc) => loc.id);
       const locations_text = [
-        ...selectedLocations.map((loc) => `${loc.name}, ${loc.country}`),
+        ...selectedLocations.map((loc) => loc.name),
         ...customLocations
       ].join(" | ");
 

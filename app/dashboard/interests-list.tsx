@@ -209,7 +209,7 @@ export function InterestsList({ userId, initialInterests, onSearch, searchingInt
                   ))}
                   {interest.locations_text.split(" | ").map((location, index) => {
                     // Skip locations that are already shown as badges
-                    if (interest.locations.some(loc => `${loc.name}, ${loc.country}` === location)) {
+                    if (interest.locations.some(loc => loc.name === location)) {
                       return null;
                     }
                     return (
